@@ -1,0 +1,25 @@
+# DRISHTI Project Dependencies
+# This project uses Node.js, so these are installed via npm/package.json.
+
+# Core Dependencies:
+react (^19.2.7)
+react-dom (^19.2.7)
+react-router-dom (^7.18.0)
+
+# 3D & Graphics Libraries:
+three (^0.185.0)
+@react-three/fiber (^9.6.1)
+@react-three/drei (^10.7.7)
+
+# Particle Effects:
+@tsparticles/react (^4.2.1)
+@tsparticles/slim (^4.2.1)
+
+# Styling & Build Tools (Dev Dependencies):
+tailwindcss (^4.3.1)
+@tailwindcss/vite (^4.3.1)
+vite (^8.1.0)
+eslint (and related plugins)
+typescript types (@types/react, @types/react-dom)
+framer-motion
+fastapi uvicorn
