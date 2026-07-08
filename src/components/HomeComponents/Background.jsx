@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-export default function AuroraBackground() {
+export default function Background() {
   return (
     <div className="absolute top-0 left-0 w-full h-[140vh] z-[-10] overflow-hidden bg-slate-50 [mask-image:linear-gradient(to_bottom,black_60%,transparent_100%)]">
       

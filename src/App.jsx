@@ -3,7 +3,7 @@ import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Navbar from "./components/HomeComponents/Navbar";
 import Footer from "./components/HomeComponents/Footer";
-import AuroraBackground from "./components/HomeComponents/AuroraBackground";
+import Background from "./components/HomeComponents/Background";
 import ModuleDetail from "./pages/ModuleDetail";
 import ModuleWorkspace from "./pages/ModuleWorkspace";
 
@@ -18,7 +18,7 @@ function AppContent() {
     <div className="relative min-h-screen flex flex-col">
       
       {/* 2. Added the Aurora Background so it covers the entire app */}
-      <AuroraBackground />
+      <Background />
 
       <Navbar />
       
