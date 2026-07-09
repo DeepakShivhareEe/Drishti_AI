@@ -1,4 +1,4 @@
-<![CDATA[<div align="center">
+<div align="center">
 
 <!-- Banner -->
 <img src="src/assets/logo.png" alt="DRISHTI Logo" width="140" />
@@ -1114,4 +1114,4 @@ SOFTWARE.
 [⬆ Back to Top](#drishti)
 
 </div>
-]]>
+
