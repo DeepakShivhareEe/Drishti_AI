@@ -99,6 +99,8 @@ export default function ModuleDetail() {
           </div>
           <Link
             to={`/workspace/${currentModule.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center justify-center px-5 py-2.5 bg-zinc-900 hover:bg-black text-white text-sm font-bold rounded-xl transition-all shadow-sm shrink-0 whitespace-nowrap"
           >
             Launch Live Workspace Console →

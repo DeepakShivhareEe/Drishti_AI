@@ -28,9 +28,10 @@ export default function Footer() {
             </h4>
             <div className="flex flex-col gap-2.5">
               <Link to="/dashboard" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">Dashboard</Link>
-              <span className="text-sm text-zinc-600 cursor-default">Modules</span>
-              <span className="text-sm text-zinc-600 cursor-default">Analytics</span>
-              <span className="text-sm text-zinc-600 cursor-default">Reports</span>
+              <Link to="/module/digital-arrest-shield" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">Digital Arrest Shield</Link>
+              <Link to="/module/ficn-vision" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">FICN Vision Agent</Link>
+              <Link to="/module/fraud-graph" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">Fraud Graph Intelligence</Link>
+              <Link to="/module/citizen-shield" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">Citizen Fraud Shield</Link>
             </div>
           </div>
 
