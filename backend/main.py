@@ -56,9 +56,11 @@ async def receive_ficn_alert(request: Request):
     current_location = "DELHI_CHECKPOINT_A"
     current_time = datetime.datetime.now()
 
-    # We only care about saving and tracking FAKE notes. 
-    if serial != "UNKNOWN" and "Counterfeit" in verdict:
-        conn = sqlite3.connect(DB_FILE)
+    # 🔥 FIX 1: Case-insensitive check to ensure we always catch the LLM's exact wording
+    if serial != "UNKNOWN" and "counterfeit" in verdict.lower():
+        
+        # 🔥 FIX 2: Added timeout=10 to prevent SQLite "database is locked" crashes
+        conn = sqlite3.connect(DB_FILE, timeout=10)
         cursor = conn.cursor()
         
         # Check if this exact fake serial exists in our DB
