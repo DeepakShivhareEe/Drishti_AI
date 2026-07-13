@@ -96,6 +96,7 @@ async def process_screening_session(
             "payload": {
                 "overall_confidence": 95.5, 
                 "status_verdict": "Appears Genuine", 
+                "forensic_reasoning": "YOUR_CONCISE_1_TO_2_SENTENCE_EXPLANATION_HERE",
                 "detected_serial": "YOUR_EXTRACTED_SERIAL_HERE",
                 "checks": {
                     "image_quality": "PASS",
@@ -106,6 +107,7 @@ async def process_screening_session(
         }
         
         Rules for the JSON payload:
+        - Populate 'forensic_reasoning' with a concise, 1-2 sentence forensic explanation of your findings. If genuine, explain why it passed. If suspicious/error, explicitly list the anomalies seen.
         - If the note looks fake, digital, or is a stock photo, change 'threat_level' to 'CRITICAL'.
         - If fake, change 'status_verdict' to "Suspicious – Counterfeit Characteristics Detected".
         - Adjust 'overall_confidence' based on your certainty (0.0 to 99.9).

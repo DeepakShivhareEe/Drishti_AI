@@ -165,6 +165,14 @@ export default function FicnVisionUi() {
                   <p className={`text-2xl font-extrabold tracking-tight ${getVerdictTextColor(result.threat_level)}`}>
                     {result.payload.status_verdict}
                   </p>
+                  {result.payload.forensic_reasoning && (
+                    <div className="mt-4 p-3 bg-zinc-800/40 border border-zinc-700/50 rounded-lg">
+                      <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-1.5">Forensic Details</p>
+                      <p className="text-zinc-300 text-sm leading-relaxed">
+                        {result.payload.forensic_reasoning}
+                      </p>
+                    </div>
+                  )}
                 </div>
                 
                 <div>
