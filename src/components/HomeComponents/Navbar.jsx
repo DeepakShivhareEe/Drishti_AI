@@ -82,7 +82,7 @@ export default function Navbar() {
 
 
   const navLinks = [
-    { label: "Dashboard", to: "/", enabled: true },
+    { label: "Dashboard", to: "/dashboard", enabled: true },
     { 
       label: "Modules", 
       to: "#",
