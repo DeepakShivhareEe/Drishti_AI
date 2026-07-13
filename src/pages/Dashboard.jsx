@@ -22,21 +22,23 @@ export default function Dashboard() {
             <TopMetrics />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <LiveThreatFeed />
-              <GeospatialMap variant="compact" />
+              <div className="lg:col-span-2 h-[500px]">
+                <GeospatialMap />
+              </div>
             </div>
             <FICNTable />
           </div>
         )}
 
         {/* VIEW 2: FULL GEOSPATIAL MAP */}
-        {activeTab === "map" && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <GeospatialMap variant="full" />
+        {activeTab === "geospatial map" && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 flex flex-col h-[650px] w-full">
+            <GeospatialMap />
           </div>
         )}
 
         {/* VIEW 3: FRAUD GRAPH NETWORK */}
-        {activeTab === "graph" && (
+        {activeTab === "graph network" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <FraudGraph />
           </div>

@@ -2,15 +2,6 @@ export default function DashboardHeader({ activeTab, setActiveTab }) {
   return (
     <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
       <div>
-        <div className="flex items-center gap-3 mb-2">
-          <span className="relative flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-          </span>
-          <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">
-            System Online • Real-time Monitoring
-          </span>
-        </div>
         <h1 className="text-3xl font-extrabold text-zinc-900 tracking-tight">DRISHTI Command Center</h1>
       </div>
       
