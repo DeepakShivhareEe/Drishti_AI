@@ -11,6 +11,7 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null);
   
   // --- AUTH STATE ---
   const [user, setUser] = useState(null);
@@ -50,11 +51,14 @@ export default function Navbar() {
       if (!ticking) {
         window.requestAnimationFrame(() => {
           const currentScrollY = window.scrollY;
+          const halfScreenHeight = window.innerHeight / 2;
+          
           setIsScrolled(currentScrollY > 20);
 
-          if (currentScrollY > lastScrollY.current && currentScrollY > 80) {
+          if (currentScrollY > lastScrollY.current && currentScrollY > halfScreenHeight) {
             setIsVisible(false);
             setProfileOpen(false); 
+            setActiveDropdown(null);
           } else {
             setIsVisible(true);
           }
@@ -74,6 +78,10 @@ export default function Navbar() {
     const handleClick = (e) => {
       if (profileRef.current && !profileRef.current.contains(e.target)) {
         setProfileOpen(false);
+      }
+      // Close dropdown if clicking outside
+      if (!e.target.closest('.dropdown-container')) {
+        setActiveDropdown(null);
       }
     };
     document.addEventListener("mousedown", handleClick);
@@ -144,29 +152,51 @@ export default function Navbar() {
 
             // 2. Render Links WITH Dropdowns (The Modules Tab)
             if (link.dropdown) {
+              const isDropdownOpen = activeDropdown === link.label;
               return (
-                <div key={link.label} className="relative group h-full">
-                  <Link
-                    to={link.to}
-                    className={`relative flex items-center gap-1.5 text-[14px] font-medium tracking-wide transition-colors duration-300 py-6 ${
-                      isActive
+                <div 
+                  key={link.label} 
+                  className="relative group h-full dropdown-container"
+                  onMouseEnter={() => setActiveDropdown(link.label)}
+                  onMouseLeave={() => setActiveDropdown(null)}
+                >
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setActiveDropdown(isDropdownOpen ? null : link.label);
+                    }}
+                    className={`relative flex items-center gap-1.5 text-[14px] font-medium tracking-wide transition-colors duration-300 py-6 outline-none cursor-pointer ${
+                      isActive || isDropdownOpen
                         ? "text-black font-semibold"
                         : "text-black hover:text-zinc-600"
                     }`}
                   >
                     {link.label}
-                    <svg className="w-3.5 h-3.5 text-zinc-500 group-hover:text-zinc-800 transition-transform duration-300 group-hover:rotate-180" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                    <svg 
+                      className={`w-3.5 h-3.5 text-zinc-500 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180 text-zinc-800' : 'group-hover:text-zinc-800 group-hover:rotate-180'}`} 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth={2.5} 
+                      viewBox="0 0 24 24"
+                    >
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                     </svg>
-                  </Link>
+                  </button>
 
                   {/* The Dropdown Menu Box */}
-                  <div className="absolute left-0 top-[85%] mt-0 w-60 opacity-0 invisible translate-y-3 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 ease-out z-50">
+                  <div 
+                    className={`absolute left-0 top-[85%] mt-0 w-60 translate-y-3 transition-all duration-300 ease-out z-50 ${
+                      isDropdownOpen 
+                        ? 'opacity-100 visible translate-y-0' 
+                        : 'opacity-0 invisible group-hover:opacity-100 group-hover:visible group-hover:translate-y-0'
+                    }`}
+                  >
                     <div className="rounded-xl border border-zinc-200 bg-white p-2 shadow-xl ring-1 ring-black/5 flex flex-col">
                       {link.dropdown.map((subLink) => (
                         <Link
                           key={subLink.label}
                           to={subLink.path}
+                          onClick={() => setActiveDropdown(null)}
                           className="w-full text-left px-3 py-2.5 text-[13px] text-zinc-600 hover:text-black hover:bg-zinc-50 rounded-lg transition-colors font-medium"
                         >
                           {subLink.label}
@@ -198,14 +228,7 @@ export default function Navbar() {
         {/* ── Right Side: Utility Actions & Dynamic Auth ── */}
         <div className="flex items-center gap-5">
           
-          <button
-            className="cursor-pointer text-zinc-600 hover:text-black hover:scale-110 active:scale-95 transition-all duration-300 focus:outline-none"
-            aria-label="Search"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-            </svg>
-          </button>
+
 
           {/* If User is Logged In -> Show Profile Avatar & Menu */}
           {user ? (
