@@ -46,22 +46,51 @@ const createCyberIcon = (color, glow, isActive) => {
   });
 };
 
+// ── Client-side demo nodes (fallback when backend is unreachable) ──
+const DEMO_NODES = [
+  { id: "demo-1",  category: "Scam Compound",       latitude: 28.6139, longitude: 77.2090, city: "New Delhi, DL",   threat_level: "Critical", ip_address: "192.168.1.44",  status: "Active", details: "Voice match: Fake CBI Script" },
+  { id: "demo-2",  category: "FICN Drop Point",      latitude: 19.0760, longitude: 72.8777, city: "Mumbai, MH",     threat_level: "High",     ip_address: null,            status: "Active", details: "Rs 500 counterfeits intercepted" },
+  { id: "demo-3",  category: "Mule Accounts",        latitude: 12.9716, longitude: 77.5946, city: "Bengaluru, KA",  threat_level: "Medium",   ip_address: "10.4.22.1",     status: "Active", details: "3 linked bank accounts flagged" },
+  { id: "demo-4",  category: "Cross-border VOIP",    latitude: 22.5726, longitude: 88.3639, city: "Kolkata, WB",    threat_level: "Critical", ip_address: "45.22.19.11",   status: "Active", details: "Spoofed TRAI caller ID traced" },
+  { id: "demo-5",  category: "Deep Fake Ops",        latitude: 26.9124, longitude: 75.7873, city: "Jaipur, RJ",     threat_level: "Critical", ip_address: "103.14.55.9",   status: "Active", details: "AI-generated impersonation of IPS officer" },
+  { id: "demo-6",  category: "FICN Print Lab",       latitude: 13.0827, longitude: 80.2707, city: "Chennai, TN",    threat_level: "High",     ip_address: "172.16.8.22",   status: "Active", details: "Rs 2000 Super-fake plates recovered" },
+  { id: "demo-7",  category: "Dark Web Laundering",  latitude: 23.0225, longitude: 72.5714, city: "Ahmedabad, GJ",  threat_level: "Critical", ip_address: "91.203.44.7",   status: "Active", details: "Crypto-to-INR mixer linked to 14 accounts" },
+  { id: "demo-8",  category: "SIM Swap Ring",        latitude: 17.3850, longitude: 78.4867, city: "Hyderabad, TS",  threat_level: "High",     ip_address: "49.37.12.88",   status: "Active", details: "12 SIM swap fraud cases in 48hrs" },
+  { id: "demo-9",  category: "Hawala Transfer Hub",  latitude: 26.8467, longitude: 80.9462, city: "Lucknow, UP",    threat_level: "Medium",   ip_address: null,            status: "Active", details: "Cross-border hawala pipeline identified" },
+  { id: "demo-10", category: "Phishing Call Center",  latitude: 21.1702, longitude: 72.8311, city: "Surat, GJ",      threat_level: "High",     ip_address: "157.43.20.6",   status: "Active", details: "Fake KYC update scripts intercepted" },
+  { id: "demo-11", category: "Mule Network Relay",   latitude: 25.5941, longitude: 85.1376, city: "Patna, BR",      threat_level: "Medium",   ip_address: "10.22.9.4",     status: "Active", details: "Fund relay chain across 8 accounts" },
+  { id: "demo-12", category: "Counterfeit Passport",  latitude: 30.7333, longitude: 76.7794, city: "Chandigarh, PB", threat_level: "Critical", ip_address: "62.18.77.3",    status: "Active", details: "Forged passport documents traced to syndicate" },
+].map(transformNode);
+
 export default function GeospatialMap({ variant = "compact" }) {
   const [nodes, setNodes] = useState([]);
   const [activeNode, setActiveNode] = useState(null);
   const [isDispatching, setIsDispatching] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLiveData, setIsLiveData] = useState(false);
 
-  // ── 1. Fetch live nodes from backend on mount ──
+  // ── 1. Fetch live nodes from backend, fall back to demo nodes ──
   useEffect(() => {
     fetch(`${API_BASE}/nodes`)
       .then(res => res.json())
       .then(data => {
         const mapped = data.map(transformNode);
-        setNodes(mapped);
-        if (mapped.length > 0) setActiveNode(mapped[0]);
+        if (mapped.length > 0) {
+          setNodes(mapped);
+          setActiveNode(mapped[0]);
+          setIsLiveData(true);
+        } else {
+          // Backend returned empty → use demo nodes
+          setNodes(DEMO_NODES);
+          setActiveNode(DEMO_NODES[0]);
+        }
       })
-      .catch(() => toast.error("Failed to load geospatial nodes. Is the backend running?"))
+      .catch(() => {
+        // Backend unreachable → use demo nodes
+        setNodes(DEMO_NODES);
+        setActiveNode(DEMO_NODES[0]);
+        toast("Using demo data — backend offline", { icon: "📡", duration: 3000 });
+      })
       .finally(() => setIsLoading(false));
   }, []);
 
@@ -69,20 +98,28 @@ export default function GeospatialMap({ variant = "compact" }) {
   useEffect(() => {
     const sse = new EventSource(`${API_BASE}/stream`);
 
-    // EVENT 1: A new threat node was created by an AI module
+    // EVENT 1: A new threat node was spawned (by simulation engine or AI module)
     sse.addEventListener("new_threat", (event) => {
       const raw = JSON.parse(event.data);
       const newNode = transformNode(raw);
       setNodes(prev => [newNode, ...prev]);
-      toast(`🚨 New threat at ${raw.city}!`, { icon: "📍" });
+      setIsLiveData(true);
+      toast(
+        `🚨 Incoming: ${raw.category} at ${raw.city}`,
+        { icon: "📍", duration: 4000 }
+      );
     });
 
-    // EVENT 2: A node was dispatched by a commander (possibly another client)
-    sse.addEventListener("node_dispatched", (event) => {
-      const { node_id } = JSON.parse(event.data);
+    // EVENT 2: A node was neutralized by a commander
+    sse.addEventListener("node_neutralized", (event) => {
+      const { node_id, city, category } = JSON.parse(event.data);
       setNodes(prev => prev.filter(n => n.id !== node_id));
       setActiveNode(prev => (prev?.id === node_id ? null : prev));
-      toast.success(`Node ${node_id} dispatched by command center.`, { duration: 3000 });
+      setIsDispatching(false);
+      toast.success(
+        `✅ ${category} at ${city} neutralized`,
+        { duration: 4000 }
+      );
     });
 
     return () => sse.close();
@@ -93,9 +130,7 @@ export default function GeospatialMap({ variant = "compact" }) {
     if (isDispatching || !activeNode) return;
     setIsDispatching(true);
 
-    const loadingToast = toast.loading(
-      `Initiating threat neutralization at ${activeNode.city}...`
-    );
+    const targetCity = activeNode.city;
 
     try {
       const res = await fetch(`${API_BASE}/dispatch`, {
@@ -104,21 +139,11 @@ export default function GeospatialMap({ variant = "compact" }) {
         body: JSON.stringify({ node_id: activeNode.id }),
       });
 
-      if (res.ok) {
-        toast.success(`Action Plan Dispatched for ${activeNode.city}!`, {
-          id: loadingToast,
-          duration: 4000,
-        });
-        // Remove dispatched node from local state
-        const remaining = nodes.filter(n => n.id !== activeNode.id);
-        setNodes(remaining);
-        setActiveNode(remaining.length > 0 ? remaining[0] : null);
-      } else {
-        throw new Error("Server error");
-      }
+      if (!res.ok) throw new Error("Server error");
+      // Node removal is handled by the SSE 'node_neutralized' event listener above.
+      // No local state mutation here — keeps all clients in sync.
     } catch {
-      toast.error("Dispatch failed. Is the backend running?", { id: loadingToast });
-    } finally {
+      toast.error(`Dispatch to ${targetCity} failed. Is the backend running?`);
       setIsDispatching(false);
     }
   };
@@ -136,7 +161,7 @@ export default function GeospatialMap({ variant = "compact" }) {
         <div>
           <h2 className="text-lg font-bold text-white">Geospatial Intelligence</h2>
           <p className="text-xs text-zinc-400 font-medium">
-            {isLoading ? "Connecting to backend..." : `Live Node Tracking • ${nodes.length} active`}
+            {isLoading ? "Connecting to backend..." : `${isLiveData ? "Live" : "Demo"} Node Tracking • ${nodes.length} active`}
           </p>
         </div>
       </div>
@@ -176,7 +201,7 @@ export default function GeospatialMap({ variant = "compact" }) {
                 : "bg-white text-zinc-900 hover:bg-zinc-200"
             }`}
           >
-            {isDispatching ? "Dispatching..." : "Dispatch Action Plan"}
+            {isDispatching ? "Deploying Response Team..." : "Dispatch Action Plan"}
           </button>
         </div>
       )}

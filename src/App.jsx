@@ -9,8 +9,9 @@ import Background from "./components/HomeComponents/Background";
 import ModuleDetail from "./pages/ModuleDetail";
 import ModuleWorkspace from "./pages/ModuleWorkspace";
 import AuthPage from "./pages/AuthPage";
-import ClearanceProfile from "./pages/ClearanceProfile"; 
+import ClearanceProfile from "./pages/ClearanceProfile";
 import CommandSettings from "./pages/CommandSettings";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 
 const FOOTER_HIDDEN_ROUTES = ["/dashboard", "/login"];
@@ -50,16 +51,16 @@ function AppContent() {
       
 
         <Routes>
+          {/* ── Public Routes ───────────────────────────────── */}
           <Route path="/" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          {/* Route for descriptive documentation details */}
-          <Route path="/module/:id" element={<ModuleDetail />} />
-      
-          {/* Route for isolated live console operations workspace */}
-          <Route path="/workspace/:id" element={<ModuleWorkspace />} />
-          <Route path="/login" element={<AuthPage />} /> 
-          <Route path="/profile" element={<ClearanceProfile />} />
-          <Route path="/settings" element={<CommandSettings />} />
+          <Route path="/login" element={<AuthPage />} />
+
+          {/* ── Protected Routes ────────────────────────────── */}
+          <Route path="/module/:id" element={<ProtectedRoute><ModuleDetail /></ProtectedRoute>} />
+          <Route path="/workspace/:id" element={<ProtectedRoute><ModuleWorkspace /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><ClearanceProfile /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><CommandSettings /></ProtectedRoute>} />
         </Routes>
       </main>
       
