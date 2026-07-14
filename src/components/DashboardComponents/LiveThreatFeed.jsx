@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 // The starting data when the page loads
@@ -21,6 +22,7 @@ const INCOMING_MOCK_DATA = [
 export default function LiveThreatFeed() {
   const [alerts, setAlerts] = useState(INITIAL_ALERTS);
   const [isLive, setIsLive] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // ── Simulate Real-Time Incoming Threats ──
   useEffect(() => {
@@ -37,8 +39,8 @@ export default function LiveThreatFeed() {
           time: "Just now",
         };
 
-        // Add the new alert to the top, and keep only the latest 15 to prevent lag
-        return [newAlert, ...prevAlerts].slice(0, 15);
+        // Add the new alert to the top, and keep only the latest 50 for the full view
+        return [newAlert, ...prevAlerts].slice(0, 50);
       });
     }, 6000); // Generates a new alert every 6 seconds
 
@@ -56,19 +58,24 @@ export default function LiveThreatFeed() {
           {/* Toggle Switch for Live Updates */}
           <button 
             onClick={() => setIsLive(!isLive)}
-            className={`relative inline-flex h-4 w-8 items-center rounded-full transition-colors ${isLive ? 'bg-emerald-500' : 'bg-zinc-300'}`}
+            className={`relative inline-flex h-4 w-8 items-center rounded-full transition-all hover:scale-110 cursor-pointer ${isLive ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-zinc-300 hover:bg-zinc-400'}`}
           >
             <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${isLive ? 'translate-x-4' : 'translate-x-1'}`} />
           </button>
         </div>
         
-        <button className="text-xs font-bold text-blue-600 hover:text-blue-700">View All</button>
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="text-xs font-bold text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-3 py-1.5 rounded-md transition-all active:scale-95 cursor-pointer"
+        >
+          View All
+        </button>
       </div>
 
       {/* Feed List */}
-      <div className="p-2 overflow-y-auto flex-1 overflow-x-hidden">
+      <div className="p-2 overflow-y-auto flex-1 overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <AnimatePresence initial={false}>
-          {alerts.map((alert) => (
+          {alerts.slice(0, 15).map((alert) => (
             <motion.div
               key={alert.id}
               initial={{ opacity: 0, y: -20, scale: 0.95 }}
@@ -95,6 +102,78 @@ export default function LiveThreatFeed() {
           ))}
         </AnimatePresence>
       </div>
+
+      {/* Full View Modal via React Portal to prevent z-index clipping */}
+      {createPortal(
+        <AnimatePresence>
+          {isModalOpen && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-zinc-900/60 backdrop-blur-sm">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-[85vh] flex flex-col overflow-hidden border border-zinc-200"
+              >
+                {/* Modal Header */}
+              <div className="p-6 border-b border-zinc-100 flex items-center justify-between bg-zinc-50">
+                <div>
+                  <h2 className="text-2xl font-bold text-zinc-900">Live Threat Feed (Full View)</h2>
+                  <p className="text-sm text-zinc-500 mt-1">Comprehensive real-time monitoring of all network threats across regions.</p>
+                </div>
+                <button 
+                  onClick={() => setIsModalOpen(false)}
+                  className="p-2.5 rounded-full hover:bg-zinc-200 text-zinc-500 hover:text-zinc-800 transition-colors cursor-pointer"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Modal Body - Grid View */}
+              <div className="flex-1 overflow-y-auto p-6 bg-zinc-50/50 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                  <AnimatePresence initial={false}>
+                    {alerts.map((alert) => (
+                      <motion.div
+                        key={alert.id}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        layout
+                        className="p-5 bg-white rounded-xl border border-zinc-200 shadow-sm hover:shadow-md hover:border-blue-200 transition-all"
+                      >
+                        <div className="flex items-center justify-between mb-4">
+                          <span className={`px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider border ${
+                            alert.status === "Critical" ? "bg-red-50 text-red-600 border-red-100" :
+                            alert.status === "Warning" ? "bg-orange-50 text-orange-600 border-orange-100" :
+                            "bg-blue-50 text-blue-600 border-blue-100"
+                          }`}>
+                            {alert.status}
+                          </span>
+                          <span className={`text-xs font-semibold ${alert.time === "Just now" ? "text-emerald-500 animate-pulse" : "text-zinc-400"}`}>
+                            {alert.time}
+                          </span>
+                        </div>
+                        <p className="text-lg font-bold text-zinc-900 mb-1 leading-tight">{alert.type}</p>
+                        <p className="text-sm text-zinc-500 font-medium mb-4 flex items-center gap-1">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                          {alert.location}
+                        </p>
+                        <div className="p-3 bg-zinc-50 rounded-lg text-sm text-zinc-700 border border-zinc-100 font-medium">
+                          {alert.details}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }
