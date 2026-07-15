@@ -82,6 +82,26 @@ export default function CoreModules() {
       borderColor: "border-cyan-100",
       tech: ["LLMs", "Agentic AI", "Omnichannel"],
     },
+    {
+      id: "phishing-scanner",
+      title: "Phishing & SMS Scanner",
+      tagline: "Instant Pattern-Based Link & Text Analysis",
+      description: "A fast, offline-capable AI engine that analyzes URLs and SMS messages for typosquatting, brand impersonation, and psychological manipulation.",
+      features: [
+        "Real-time URL structure & DNS verification",
+        "NLP-based urgency and threat detection",
+        "Brand impersonation & homoglyph analysis"
+      ],
+      icon: (
+        <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+        </svg>
+      ),
+      color: "text-amber-600",
+      bgColor: "bg-amber-50",
+      borderColor: "border-amber-100",
+      tech: ["Heuristics", "NLP", "Offline Engine"],
+    },
   ];
 
   return (
@@ -146,10 +166,10 @@ export default function CoreModules() {
                 {/* Learn More Interactive Link */}
                 <div className="mt-auto">
                   <Link 
-                    to={`/module/${mod.id}`} 
+                    to={mod.id === "phishing-scanner" ? "/dashboard/phishing" : `/module/${mod.id}`} 
                     className="group inline-flex items-center gap-2 text-sm font-bold text-zinc-900 hover:text-blue-600 transition-colors"
                   >
-                    Learn more about {mod.title.split(" ")[0]}
+                    {mod.id === "phishing-scanner" ? "Launch Scanner" : `Learn more about ${mod.title.split(" ")[0]}`}
                     <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                     </svg>
