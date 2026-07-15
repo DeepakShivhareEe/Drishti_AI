@@ -1,11 +1,10 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
+// Utilities
 import ScrollToTop from "./components/ScrollToTop";
+
+// New Pages
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
-import Navbar from "./components/HomeComponents/Navbar";
-import Footer from "./components/HomeComponents/Footer";
-import Background from "./components/HomeComponents/Background";
 import ModuleDetail from "./pages/ModuleDetail";
 import ModuleWorkspace from "./pages/ModuleWorkspace";
 import AuthPage from "./pages/AuthPage";
@@ -13,8 +12,18 @@ import ClearanceProfile from "./pages/ClearanceProfile";
 import CommandSettings from "./pages/CommandSettings";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+// Old Pages to keep
+import PhishingPage from './pages/PhishingPage';
 
-const FOOTER_HIDDEN_ROUTES = ["/dashboard", "/login"];
+// New Components
+import Navbar from "./components/HomeComponents/Navbar";
+import Footer from "./components/HomeComponents/Footer";
+import Background from "./components/HomeComponents/Background";
+
+// Import App CSS
+import './App.css';
+
+const FOOTER_HIDDEN_ROUTES = ["/dashboard", "/dashboard/scam-detector", "/dashboard/currency", "/login"];
 const NAVBAR_HIDDEN_ROUTES = ["/login"];
 
 function AppContent() {
@@ -31,36 +40,20 @@ function AppContent() {
 
       {showNavbar && <Navbar />}
       
-      {/* 3. Removed the paddingTop style! The Hero component already handles its own padding. */}
       <main className="flex-1 w-full">
-
-      <ScrollToTop /> 
-      <Toaster 
-        position="bottom-right" 
-        toastOptions={{
-          style: {
-            background: '#18181b', // zinc-900
-            color: '#fff',
-            borderRadius: '12px',
-            fontSize: '14px',
-            fontWeight: '600'
-          }
-        }} 
-      />
-
-      
-
+        <ScrollToTop />
         <Routes>
           {/* ── Public Routes ───────────────────────────────── */}
           <Route path="/" element={<Home />} />
-          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/login" element={<AuthPage />} />
-
+          <Route path="/dashboard" element={<Dashboard />} />
           {/* ── Protected Routes ────────────────────────────── */}
           <Route path="/module/:id" element={<ProtectedRoute><ModuleDetail /></ProtectedRoute>} />
           <Route path="/workspace/:id" element={<ProtectedRoute><ModuleWorkspace /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><ClearanceProfile /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><CommandSettings /></ProtectedRoute>} />
+          
+          <Route path="/dashboard/phishing" element={<PhishingPage />} />
         </Routes>
       </main>
       
@@ -69,12 +62,10 @@ function AppContent() {
   );
 }
 
-function App() {
+export default function App() {
   return (
     <BrowserRouter>
       <AppContent />
     </BrowserRouter>
   );
 }
-
-export default App;

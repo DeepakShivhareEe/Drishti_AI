@@ -9,6 +9,7 @@ import json
 import random
 
 from sse_starlette.sse import EventSourceResponse
+from api.routes.phishing_scanner import router as phishing_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("DRISHTI_HUB")
@@ -127,6 +128,9 @@ async def lifespan(app):
 
 
 app = FastAPI(title="DRISHTI Command Center Hub", lifespan=lifespan)
+
+# Mount new phishing router
+app.include_router(phishing_router)
 
 app.add_middleware(
     CORSMiddleware,
