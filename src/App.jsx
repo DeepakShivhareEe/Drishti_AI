@@ -23,12 +23,12 @@ import Background from "./components/HomeComponents/Background";
 // Import App CSS
 import './App.css';
 
-const FOOTER_HIDDEN_ROUTES = ["/dashboard", "/dashboard/scam-detector", "/dashboard/currency", "/login"];
+const FOOTER_HIDDEN_ROUTES = ["/dashboard", "/dashboard/phishing", "/login"];
 const NAVBAR_HIDDEN_ROUTES = ["/login"];
 
 function AppContent() {
   const location = useLocation();
-  const showFooter = !FOOTER_HIDDEN_ROUTES.includes(location.pathname);
+  const showFooter = !FOOTER_HIDDEN_ROUTES.includes(location.pathname) && !location.pathname.startsWith('/workspace');
   const showNavbar = !NAVBAR_HIDDEN_ROUTES.includes(location.pathname);
   const isLoginPage = location.pathname === "/login";
 
@@ -52,8 +52,7 @@ function AppContent() {
           <Route path="/workspace/:id" element={<ProtectedRoute><ModuleWorkspace /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><ClearanceProfile /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><CommandSettings /></ProtectedRoute>} />
-          
-          <Route path="/dashboard/phishing" element={<PhishingPage />} />
+          <Route path="/dashboard/phishing" element={<ProtectedRoute><PhishingPage /></ProtectedRoute>} />
         </Routes>
       </main>
       

@@ -100,7 +100,7 @@ export default function Navbar() {
         { label: "FICN Vision Agent", path: "/module/ficn-vision" },
         { label: "Fraud Graph Intelligence", path: "/module/fraud-graph" },
         { label: "Citizen Fraud Shield", path: "/module/citizen-shield" },
-        { label: "Phishing & SMS Scanner", path: "/dashboard/phishing" },
+        { label: "Phishing & SMS Scanner", path: "/module/phishing-scanner" },
       ]
     },
     { label: "Analytics", to: "#", enabled: false },

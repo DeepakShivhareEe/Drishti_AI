@@ -1,0 +1,283 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 56 1000 664" font-family="'Inter', 'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:0.12"/>
+      <stop offset="100%" style="stop-color:#d97706;stop-opacity:0.06"/>
+    </linearGradient>
+    <linearGradient id="engineGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#fef3c7"/>
+      <stop offset="100%" style="stop-color:#fffbeb"/>
+    </linearGradient>
+    <linearGradient id="frontendGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#eff6ff"/>
+      <stop offset="100%" style="stop-color:#f8fafc"/>
+    </linearGradient>
+    <linearGradient id="dataGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f0fdf4"/>
+      <stop offset="100%" style="stop-color:#f8fafc"/>
+    </linearGradient>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.06"/>
+    </filter>
+    <filter id="shadowSm" x="-2%" y="-2%" width="104%" height="108%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000" flood-opacity="0.05"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1000" height="720" rx="16" fill="#fafafa"/>
+
+  <!-- Title Bar -->
+  <rect x="0" y="0" width="1000" height="56" rx="16" fill="url(#headerGrad)"/>
+  <rect x="0" y="40" width="1000" height="16" fill="url(#headerGrad)"/>
+  <text x="24" y="36" font-size="18" font-weight="800" fill="#92400e" letter-spacing="0.02em">Phishing &amp; SMS Scanner — System Architecture</text>
+  <text x="976" y="36" font-size="11" font-weight="600" fill="#b45309" text-anchor="end" letter-spacing="0.05em">DRISHTI AI • v1.0</text>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- FRONTEND LAYER -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <rect x="20" y="72" width="300" height="260" rx="14" fill="url(#frontendGrad)" stroke="#bfdbfe" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="20" y="72" width="300" height="34" rx="14" fill="#3b82f6" opacity="0.9"/>
+  <rect x="20" y="92" width="300" height="14" fill="#3b82f6" opacity="0.9"/>
+  <text x="34" y="94" font-size="12" font-weight="700" fill="#fff" letter-spacing="0.08em">🖥️  FRONTEND — React + Vite</text>
+
+  <!-- PhishingPage.jsx Box -->
+  <rect x="36" y="116" width="268" height="42" rx="8" fill="#fff" stroke="#93c5fd" stroke-width="1" filter="url(#shadowSm)"/>
+  <text x="170" y="134" font-size="11" font-weight="700" fill="#1e40af" text-anchor="middle">PhishingPage.jsx</text>
+  <text x="170" y="149" font-size="9" fill="#64748b" text-anchor="middle">Dual-tab scanner UI (URL / Text)</text>
+
+  <!-- URL Tab -->
+  <rect x="36" y="168" width="126" height="50" rx="8" fill="#fff" stroke="#93c5fd" stroke-width="1" filter="url(#shadowSm)"/>
+  <text x="99" y="186" font-size="10" font-weight="700" fill="#2563eb" text-anchor="middle">🔗 URL Input</text>
+  <text x="99" y="200" font-size="8" fill="#64748b" text-anchor="middle">Paste suspicious link</text>
+  <text x="99" y="212" font-size="8" fill="#64748b" text-anchor="middle">+ 4 sample buttons</text>
+
+  <!-- Text Tab -->
+  <rect x="178" y="168" width="126" height="50" rx="8" fill="#fff" stroke="#93c5fd" stroke-width="1" filter="url(#shadowSm)"/>
+  <text x="241" y="186" font-size="10" font-weight="700" fill="#2563eb" text-anchor="middle">💬 SMS / Text</text>
+  <text x="241" y="200" font-size="8" fill="#64748b" text-anchor="middle">Paste message/email</text>
+  <text x="241" y="212" font-size="8" fill="#64748b" text-anchor="middle">+ 4 sample buttons</text>
+
+  <!-- Results Panel -->
+  <rect x="36" y="228" width="268" height="50" rx="8" fill="#fff" stroke="#93c5fd" stroke-width="1" filter="url(#shadowSm)"/>
+  <text x="170" y="248" font-size="10" font-weight="700" fill="#1e40af" text-anchor="middle">📊 Results Panel</text>
+  <text x="170" y="262" font-size="8" fill="#64748b" text-anchor="middle">Threat Score Gauge • Risk Level Badge • Findings List</text>
+
+  <!-- Auth badge -->
+  <rect x="36" y="288" width="268" height="28" rx="6" fill="#fef2f2" stroke="#fecaca" stroke-width="1"/>
+  <text x="170" y="306" font-size="9" font-weight="600" fill="#dc2626" text-anchor="middle">🔒 ProtectedRoute — Firebase Auth Required</text>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- BACKEND API LAYER -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <rect x="350" y="72" width="300" height="130" rx="14" fill="#fff" stroke="#e5e7eb" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="350" y="72" width="300" height="34" rx="14" fill="#6366f1" opacity="0.85"/>
+  <rect x="350" y="92" width="300" height="14" fill="#6366f1" opacity="0.85"/>
+  <text x="364" y="94" font-size="12" font-weight="700" fill="#fff" letter-spacing="0.08em">⚡ API — FastAPI Router</text>
+
+  <!-- Routes -->
+  <rect x="366" y="116" width="268" height="32" rx="7" fill="#eef2ff" stroke="#c7d2fe" stroke-width="1"/>
+  <text x="380" y="136" font-size="10" font-weight="700" fill="#4338ca">POST</text>
+  <text x="415" y="136" font-size="10" fill="#312e81" font-weight="500">/api/phishing/scan-url</text>
+
+  <rect x="366" y="156" width="268" height="32" rx="7" fill="#eef2ff" stroke="#c7d2fe" stroke-width="1"/>
+  <text x="380" y="176" font-size="10" font-weight="700" fill="#4338ca">POST</text>
+  <text x="415" y="176" font-size="10" fill="#312e81" font-weight="500">/api/phishing/scan-text</text>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- ENGINE CORE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <rect x="350" y="222" width="630" height="388" rx="14" fill="url(#engineGrad)" stroke="#fcd34d" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="350" y="222" width="630" height="34" rx="14" fill="#d97706" opacity="0.85"/>
+  <rect x="350" y="242" width="630" height="14" fill="#d97706" opacity="0.85"/>
+  <text x="364" y="244" font-size="12" font-weight="700" fill="#fff" letter-spacing="0.08em">🧠 PhishingEngine — Core Analysis (587 lines, singleton)</text>
+
+  <!-- URL Pipeline -->
+  <rect x="366" y="268" width="295" height="326" rx="10" fill="#fff" stroke="#fbbf24" stroke-width="1" filter="url(#shadowSm)"/>
+  <text x="513" y="289" font-size="11" font-weight="800" fill="#92400e" text-anchor="middle">scan_url() — 13-Step Pipeline</text>
+
+  <!-- URL Steps -->
+  <rect x="378" y="298" width="130" height="22" rx="5" fill="#fef3c7" stroke="#fde68a" stroke-width="0.8"/>
+  <text x="443" y="313" font-size="8" font-weight="600" fill="#78350f" text-anchor="middle">1. Parse &amp; Normalize</text>
+
+  <rect x="518" y="298" width="130" height="22" rx="5" fill="#fef3c7" stroke="#fde68a" stroke-width="0.8"/>
+  <text x="583" y="313" font-size="8" font-weight="600" fill="#78350f" text-anchor="middle">2. Legit Domain Check</text>
+
+  <rect x="378" y="326" width="130" height="22" rx="5" fill="#fef3c7" stroke="#fde68a" stroke-width="0.8"/>
+  <text x="443" y="341" font-size="8" font-weight="600" fill="#78350f" text-anchor="middle">3. HTTP vs HTTPS</text>
+
+  <rect x="518" y="326" width="130" height="22" rx="5" fill="#fef3c7" stroke="#fde68a" stroke-width="0.8"/>
+  <text x="583" y="341" font-size="8" font-weight="600" fill="#78350f" text-anchor="middle">4. IP Address URL</text>
+
+  <rect x="378" y="354" width="130" height="22" rx="5" fill="#fef3c7" stroke="#fde68a" stroke-width="0.8"/>
+  <text x="443" y="369" font-size="8" font-weight="600" fill="#78350f" text-anchor="middle">5. Gov.in Spoofing</text>
+
+  <rect x="518" y="354" width="130" height="22" rx="5" fill="#fff7ed" stroke="#fed7aa" stroke-width="0.8"/>
+  <text x="583" y="369" font-size="8" font-weight="600" fill="#9a3412" text-anchor="middle">6. Suspicious TLD</text>
+
+  <rect x="378" y="382" width="130" height="22" rx="5" fill="#fff7ed" stroke="#fed7aa" stroke-width="0.8"/>
+  <text x="443" y="397" font-size="8" font-weight="600" fill="#9a3412" text-anchor="middle">7. Malicious Patterns</text>
+
+  <rect x="518" y="382" width="130" height="22" rx="5" fill="#fef3c7" stroke="#fde68a" stroke-width="0.8"/>
+  <text x="583" y="397" font-size="8" font-weight="600" fill="#78350f" text-anchor="middle">8. URL Shortener</text>
+
+  <rect x="378" y="410" width="130" height="22" rx="5" fill="#fef2f2" stroke="#fecaca" stroke-width="0.8"/>
+  <text x="443" y="425" font-size="8" font-weight="700" fill="#991b1b" text-anchor="middle">9. Typosquatting ⚠️</text>
+
+  <rect x="518" y="410" width="130" height="22" rx="5" fill="#fef2f2" stroke="#fecaca" stroke-width="0.8"/>
+  <text x="583" y="425" font-size="8" font-weight="700" fill="#991b1b" text-anchor="middle">10. Homoglyph Attack ⚠️</text>
+
+  <rect x="378" y="438" width="130" height="22" rx="5" fill="#fef3c7" stroke="#fde68a" stroke-width="0.8"/>
+  <text x="443" y="453" font-size="8" font-weight="600" fill="#78350f" text-anchor="middle">11. Excess Subdomains</text>
+
+  <rect x="518" y="438" width="130" height="22" rx="5" fill="#fff7ed" stroke="#fed7aa" stroke-width="0.8"/>
+  <text x="583" y="453" font-size="8" font-weight="600" fill="#9a3412" text-anchor="middle">12. Brand Spoof</text>
+
+  <rect x="378" y="466" width="270" height="22" rx="5" fill="#fff7ed" stroke="#fed7aa" stroke-width="0.8"/>
+  <text x="513" y="481" font-size="8" font-weight="600" fill="#9a3412" text-anchor="middle">13. Suspicious Path + Dangerous Query Params</text>
+
+  <!-- Text Pipeline -->
+  <rect x="675" y="268" width="290" height="248" rx="10" fill="#fff" stroke="#fbbf24" stroke-width="1" filter="url(#shadowSm)"/>
+  <text x="820" y="289" font-size="11" font-weight="800" fill="#92400e" text-anchor="middle">scan_text() — 9-Step NLP Pipeline</text>
+
+  <rect x="687" y="298" width="265" height="22" rx="5" fill="#dbeafe" stroke="#93c5fd" stroke-width="0.8"/>
+  <text x="820" y="313" font-size="8" font-weight="600" fill="#1e3a8a" text-anchor="middle">1. Extract URLs → feed to scan_url()</text>
+
+  <rect x="687" y="326" width="265" height="22" rx="5" fill="#fef3c7" stroke="#fde68a" stroke-width="0.8"/>
+  <text x="820" y="341" font-size="8" font-weight="600" fill="#78350f" text-anchor="middle">2. Scan Each Embedded URL</text>
+
+  <rect x="687" y="354" width="126" height="22" rx="5" fill="#fff7ed" stroke="#fed7aa" stroke-width="0.8"/>
+  <text x="750" y="369" font-size="8" font-weight="600" fill="#9a3412" text-anchor="middle">3. Urgency Phrases</text>
+
+  <rect x="826" y="354" width="126" height="22" rx="5" fill="#fff7ed" stroke="#fed7aa" stroke-width="0.8"/>
+  <text x="889" y="369" font-size="8" font-weight="600" fill="#9a3412" text-anchor="middle">4. Financial Bait</text>
+
+  <rect x="687" y="382" width="126" height="22" rx="5" fill="#fef2f2" stroke="#fecaca" stroke-width="0.8"/>
+  <text x="750" y="397" font-size="8" font-weight="700" fill="#991b1b" text-anchor="middle">5. Credential Harvest ⚠️</text>
+
+  <rect x="826" y="382" width="126" height="22" rx="5" fill="#fef2f2" stroke="#fecaca" stroke-width="0.8"/>
+  <text x="889" y="397" font-size="8" font-weight="700" fill="#991b1b" text-anchor="middle">6. Arrest Threats ⚠️</text>
+
+  <rect x="687" y="410" width="126" height="22" rx="5" fill="#fef2f2" stroke="#fecaca" stroke-width="0.8"/>
+  <text x="750" y="425" font-size="8" font-weight="700" fill="#991b1b" text-anchor="middle">7. Isolation Tactics ⚠️</text>
+
+  <rect x="826" y="410" width="126" height="22" rx="5" fill="#fff7ed" stroke="#fed7aa" stroke-width="0.8"/>
+  <text x="889" y="425" font-size="8" font-weight="600" fill="#9a3412" text-anchor="middle">8. Brand Impersonation</text>
+
+  <rect x="687" y="438" width="265" height="22" rx="5" fill="#fef3c7" stroke="#fde68a" stroke-width="0.8"/>
+  <text x="820" y="453" font-size="8" font-weight="600" fill="#78350f" text-anchor="middle">9. Phone Numbers + ₹ Amounts Pattern Match</text>
+
+  <!-- Scoring box inside text pipeline area -->
+  <rect x="675" y="528" width="290" height="68" rx="10" fill="#fff" stroke="#fbbf24" stroke-width="1" filter="url(#shadowSm)"/>
+  <text x="820" y="548" font-size="10" font-weight="800" fill="#92400e" text-anchor="middle">⚖️ Weighted Scoring Engine</text>
+  <text x="820" y="564" font-size="8" fill="#78350f" text-anchor="middle">🟢 safe: 0–19   🟡 suspicious: 20–44</text>
+  <text x="820" y="578" font-size="8" fill="#78350f" text-anchor="middle">🟠 dangerous: 45–69   🔴 critical: 70–100</text>
+
+  <!-- Recursive arrow from text pipeline back to URL pipeline -->
+  <path d="M 687 310 L 665 310 L 665 290 L 660 290" stroke="#3b82f6" stroke-width="1.5" fill="none" stroke-dasharray="4 3" marker-end="url(#arrowBlue)"/>
+  <defs>
+    <marker id="arrowBlue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#3b82f6"/>
+    </marker>
+    <marker id="arrowGray" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#9ca3af"/>
+    </marker>
+    <marker id="arrowAmber" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#d97706"/>
+    </marker>
+  </defs>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- DATA LAYER -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <rect x="20" y="348" width="300" height="262" rx="14" fill="url(#dataGrad)" stroke="#86efac" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="20" y="348" width="300" height="34" rx="14" fill="#16a34a" opacity="0.85"/>
+  <rect x="20" y="368" width="300" height="14" fill="#16a34a" opacity="0.85"/>
+  <text x="34" y="370" font-size="12" font-weight="700" fill="#fff" letter-spacing="0.08em">📁 DATA — phishing_patterns.json</text>
+
+  <rect x="36" y="392" width="268" height="30" rx="6" fill="#fff" stroke="#a7f3d0" stroke-width="1"/>
+  <text x="170" y="411" font-size="9" font-weight="700" fill="#166534" text-anchor="middle">phishing_domains</text>
+
+  <rect x="48" y="428" width="120" height="20" rx="4" fill="#ecfdf5" stroke="#bbf7d0" stroke-width="0.8"/>
+  <text x="108" y="442" font-size="7.5" font-weight="600" fill="#14532d" text-anchor="middle">known_malicious</text>
+
+  <rect x="176" y="428" width="120" height="20" rx="4" fill="#ecfdf5" stroke="#bbf7d0" stroke-width="0.8"/>
+  <text x="236" y="442" font-size="7.5" font-weight="600" fill="#14532d" text-anchor="middle">legitimate_domains</text>
+
+  <rect x="48" y="454" width="248" height="20" rx="4" fill="#ecfdf5" stroke="#bbf7d0" stroke-width="0.8"/>
+  <text x="172" y="468" font-size="7.5" font-weight="600" fill="#14532d" text-anchor="middle">brand_targets (SBI, PayTM, Google Pay, ...)</text>
+
+  <rect x="36" y="482" width="130" height="24" rx="6" fill="#fff" stroke="#a7f3d0" stroke-width="1"/>
+  <text x="101" y="498" font-size="9" font-weight="700" fill="#166534" text-anchor="middle">suspicious_tlds</text>
+
+  <rect x="174" y="482" width="130" height="24" rx="6" fill="#fff" stroke="#a7f3d0" stroke-width="1"/>
+  <text x="239" y="498" font-size="9" font-weight="700" fill="#166534" text-anchor="middle">url_shorteners</text>
+
+  <rect x="36" y="514" width="268" height="30" rx="6" fill="#fff" stroke="#a7f3d0" stroke-width="1"/>
+  <text x="170" y="533" font-size="9" font-weight="700" fill="#166534" text-anchor="middle">sms_patterns</text>
+
+  <rect x="48" y="550" width="80" height="18" rx="4" fill="#ecfdf5" stroke="#bbf7d0" stroke-width="0.8"/>
+  <text x="88" y="563" font-size="7" font-weight="600" fill="#14532d" text-anchor="middle">urgency</text>
+
+  <rect x="134" y="550" width="80" height="18" rx="4" fill="#ecfdf5" stroke="#bbf7d0" stroke-width="0.8"/>
+  <text x="174" y="563" font-size="7" font-weight="600" fill="#14532d" text-anchor="middle">financial_bait</text>
+
+  <rect x="220" y="550" width="80" height="18" rx="4" fill="#ecfdf5" stroke="#bbf7d0" stroke-width="0.8"/>
+  <text x="260" y="563" font-size="7" font-weight="600" fill="#14532d" text-anchor="middle">credentials</text>
+
+  <rect x="48" y="574" width="80" height="18" rx="4" fill="#fef2f2" stroke="#fecaca" stroke-width="0.8"/>
+  <text x="88" y="587" font-size="7" font-weight="700" fill="#991b1b" text-anchor="middle">critical_kw</text>
+
+  <rect x="134" y="574" width="80" height="18" rx="4" fill="#fef2f2" stroke="#fecaca" stroke-width="0.8"/>
+  <text x="174" y="587" font-size="7" font-weight="700" fill="#991b1b" text-anchor="middle">isolation</text>
+
+  <rect x="220" y="574" width="80" height="18" rx="4" fill="#ecfdf5" stroke="#bbf7d0" stroke-width="0.8"/>
+  <text x="260" y="587" font-size="7" font-weight="600" fill="#14532d" text-anchor="middle">impersonation</text>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- FLOW ARROWS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+
+  <!-- Frontend → API (URL) -->
+  <path d="M 170 218 L 170 200 L 340 200 L 340 130 L 362 130" stroke="#6366f1" stroke-width="1.5" fill="none" marker-end="url(#arrowBlue)"/>
+  <text x="260" y="195" font-size="7" font-weight="600" fill="#6366f1">POST /scan-url</text>
+
+  <!-- Frontend → API (Text) -->
+  <path d="M 304 200 L 340 200 L 340 170 L 362 170" stroke="#6366f1" stroke-width="1.5" fill="none" marker-end="url(#arrowBlue)"/>
+  <text x="260" y="212" font-size="7" font-weight="600" fill="#6366f1">POST /scan-text</text>
+
+  <!-- API → Engine -->
+  <path d="M 500 200 L 500 218" stroke="#d97706" stroke-width="1.8" fill="none" marker-end="url(#arrowAmber)"/>
+  <text x="510" y="214" font-size="7" font-weight="600" fill="#d97706">invoke</text>
+
+  <!-- Data → Engine -->
+  <path d="M 320 450 L 340 450 L 340 400 L 362 400" stroke="#16a34a" stroke-width="1.5" fill="none" stroke-dasharray="5 3" marker-end="url(#arrowGray)"/>
+  <text x="332" y="385" font-size="7" font-weight="600" fill="#16a34a" transform="rotate(-90, 332, 385)">patterns</text>
+
+  <!-- Response arrow back -->
+  <path d="M 500 195 L 500 195" stroke="none"/>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- LEGEND -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <rect x="20" y="626" width="960" height="80" rx="12" fill="#fff" stroke="#e5e7eb" stroke-width="1" filter="url(#shadowSm)"/>
+  <text x="36" y="648" font-size="10" font-weight="800" fill="#374151" letter-spacing="0.05em">DESIGN NOTES</text>
+
+  <circle cx="44" cy="666" r="5" fill="#f59e0b"/>
+  <text x="56" y="670" font-size="9" fill="#374151" font-weight="500">Fully offline — no API keys or DNS lookups needed</text>
+
+  <circle cx="310" cy="666" r="5" fill="#6366f1"/>
+  <text x="322" y="670" font-size="9" fill="#374151" font-weight="500">Singleton pattern — patterns loaded once at boot</text>
+
+  <circle cx="570" cy="666" r="5" fill="#3b82f6"/>
+  <text x="582" y="670" font-size="9" fill="#374151" font-weight="500">Recursive: text scans invoke URL scans</text>
+
+  <circle cx="44" cy="690" r="5" fill="#dc2626"/>
+  <text x="56" y="694" font-size="9" fill="#374151" font-weight="500">⚠️ = instant critical trigger (score ≥ 100)</text>
+
+  <circle cx="310" cy="690" r="5" fill="#16a34a"/>
+  <text x="322" y="694" font-size="9" fill="#374151" font-weight="500">India-focused: SBI, PayTM, CBI, Digital Arrest</text>
+
+  <circle cx="570" cy="690" r="5" fill="#0ea5e9"/>
+  <text x="582" y="694" font-size="9" fill="#374151" font-weight="500">Hindi/Hinglish NLP patterns supported</text>
+</svg>

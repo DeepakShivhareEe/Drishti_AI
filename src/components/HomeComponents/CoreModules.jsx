@@ -166,10 +166,10 @@ export default function CoreModules() {
                 {/* Learn More Interactive Link */}
                 <div className="mt-auto">
                   <Link 
-                    to={mod.id === "phishing-scanner" ? "/dashboard/phishing" : `/module/${mod.id}`} 
+                    to={`/module/${mod.id}`} 
                     className="group inline-flex items-center gap-2 text-sm font-bold text-zinc-900 hover:text-blue-600 transition-colors"
                   >
-                    {mod.id === "phishing-scanner" ? "Launch Scanner" : `Learn more about ${mod.title.split(" ")[0]}`}
+                    Learn more about {mod.title.split(" ")[0]}
                     <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                     </svg>
