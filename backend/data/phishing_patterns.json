@@ -1,0 +1,129 @@
+{
+    "phishing_domains": {
+        "known_malicious_patterns": [
+            "sbi-kyc", "sbi-update", "sbi-verify", "hdfc-secure", "hdfc-login",
+            "icici-verify", "icici-update", "axis-bank-login", "kotak-verify",
+            "paytm-reward", "paytm-cashback", "paytm-verify", "phonepe-reward",
+            "gpay-prize", "gpay-cashback", "amazon-prize", "flipkart-winner",
+            "whatsapp-update", "instagram-verify", "facebook-login-verify",
+            "govt-subsidy", "pm-kisan-verify", "aadhaar-update", "pan-verify",
+            "epfo-claim", "irctc-refund", "incometax-refund", "gst-verify",
+            "lic-bonus", "mutual-fund-winner", "crypto-profit", "trading-bonus",
+            "free-recharge", "jio-offer", "airtel-bonus", "vi-reward"
+        ],
+        "legitimate_domains": [
+            "google.com", "youtube.com", "facebook.com", "instagram.com", "twitter.com",
+            "amazon.in", "amazon.com", "flipkart.com", "myntra.com", "meesho.com",
+            "paytm.com", "phonepe.com", "sbi.co.in", "onlinesbi.sbi",
+            "hdfcbank.com", "icicibank.com", "axisbank.com", "kotakbank.com",
+            "rbi.org.in", "incometax.gov.in", "uidai.gov.in", "india.gov.in",
+            "irctc.co.in", "epfindia.gov.in", "npci.org.in",
+            "github.com", "stackoverflow.com", "wikipedia.org",
+            "microsoft.com", "apple.com", "linkedin.com", "whatsapp.com",
+            "zomato.com", "swiggy.com", "ola.com", "uber.com",
+            "razorpay.com", "stripe.com", "jio.com", "airtel.in"
+        ],
+        "brand_targets": {
+            "sbi": ["sbi", "onlinesbi", "state bank", "yono"],
+            "hdfc": ["hdfc", "hdfcbank"],
+            "icici": ["icici", "icicibank"],
+            "axis": ["axis", "axisbank"],
+            "paytm": ["paytm", "paytmmall"],
+            "phonepe": ["phonepe", "phone pe"],
+            "gpay": ["gpay", "googlepay", "google pay", "tez"],
+            "amazon": ["amazon", "amzn"],
+            "flipkart": ["flipkart", "fkrt"],
+            "whatsapp": ["whatsapp", "whatsap", "watsapp"],
+            "instagram": ["instagram", "insta"],
+            "govt": ["gov", "govt", "government", "sarkar", "sarkari"],
+            "aadhaar": ["aadhaar", "aadhar", "uidai"],
+            "pan": ["pan", "pancard", "pan card"],
+            "epfo": ["epfo", "pf", "provident fund"]
+        }
+    },
+    "suspicious_tlds": [
+        ".xyz", ".tk", ".ml", ".cf", ".gq", ".ga", ".buzz", ".top",
+        ".club", ".work", ".click", ".link", ".info", ".site", ".live",
+        ".online", ".space", ".website", ".win", ".loan", ".racing",
+        ".review", ".science", ".party", ".stream", ".download",
+        ".bid", ".trade", ".date", ".faith", ".accountant", ".cricket"
+    ],
+    "url_shorteners": [
+        "bit.ly", "tinyurl.com", "t.co", "goo.gl", "ow.ly", "is.gd",
+        "buff.ly", "rebrand.ly", "cutt.ly", "shorturl.at", "rb.gy",
+        "tiny.cc", "lnkd.in", "v.gd", "qr.ae", "clck.ru"
+    ],
+    "suspicious_url_paths": [
+        "/login", "/signin", "/verify", "/update", "/confirm",
+        "/secure", "/account", "/banking", "/kyc", "/otp",
+        "/password", "/reset", "/unlock", "/suspended", "/blocked",
+        "/reward", "/prize", "/winner", "/cashback", "/claim",
+        "/refund", "/bonus", "/offer", "/free", "/gift",
+        "/verify-otp", "/kyc-update", "/join", "/register"
+    ],
+    "critical_paths": [
+        "/pay", "/payment", "/clearance"
+    ],
+    "dangerous_query_params": [
+        "amt=", "fee=", "upi=", "aadhaar=", "pan=", "ref=tg", "ref=telegram"
+    ],
+    "sms_patterns": {
+        "urgency_phrases": [
+            "your account will be blocked", "account suspended", "act immediately",
+            "within 24 hours", "within 2 hours", "last warning", "final notice",
+            "urgent action required", "immediate attention needed",
+            "failure to comply", "will be deactivated", "will be terminated",
+            "turant", "abhi karo", "jaldi karo", "account band ho jayega",
+            "account block ho jayega", "turant verify karo", "aakhri mauka",
+            "aakhri chance", "aaj hi karo", "time khatam ho raha hai"
+        ],
+        "financial_bait": [
+            "won a prize", "congratulations you won", "lottery winner",
+            "cashback of Rs", "cashback of ₹", "reward points",
+            "claim your reward", "free gift", "bonus credit",
+            "10000 cashback", "50000 prize", "lakh prize", "crore lottery",
+            "aapne jeeta hai", "inaam mila hai", "lottery lagi hai",
+            "cashback mil raha hai", "free recharge", "muft data"
+        ],
+        "credential_harvesting": [
+            "share your OTP", "enter your PIN", "send OTP",
+            "share the code", "verification code", "confirm your password",
+            "update your details", "verify your identity",
+            "link your account", "re-verify KYC", "KYC update pending",
+            "OTP bhejo", "PIN batao", "password dijiye",
+            "apna OTP share karo", "KYC update karo", "verify karo apna account"
+        ],
+        "threat_phrases": [
+            "legal action will be taken", "FIR will be filed",
+            "police complaint", "case registered against",
+            "money laundering detected", "suspicious activity found",
+            "your SIM will be blocked", "number will be deactivated",
+            "kanuni karwahi", "FIR darj hogi", "police complaint hogi",
+            "SIM block ho jayega", "number band ho jayega"
+        ],
+        "impersonation_phrases": [
+            "this is from SBI", "HDFC Bank here", "RBI notification",
+            "income tax department", "customs department", "TRAI authority",
+            "telecom department", "cyber cell calling", "CBI officer",
+            "we are from bank", "government scheme", "PM Kisan",
+            "SBI se bol rahe hain", "bank se call", "sarkar ki yojana",
+            "aapka account mein problem", "hum bank se bol rahe hain"
+        ],
+        "critical_keywords": [
+            "arrest", "warrant", "fir", "cbi", "narcotics", "cyber crime cell", "digital custody", "digital arrest"
+        ],
+        "isolation_tactics": [
+            "stay on video call", "do not disconnect", "do not inform anyone", "keep this confidential", "secret"
+        ],
+        "fraud_links": [
+            "upi://pay?pa=", "t.me/"
+        ],
+        "fee_demands": [
+            "registration fee", "processing fee", "parcel blocked", "courier blocked", "customs fee", "pay fine for parcel"
+        ]
+    },
+    "safe_indicators": [
+        "https", "verified domain", "official government site",
+        "well-known brand with correct spelling", "no suspicious redirects"
+    ]
+}

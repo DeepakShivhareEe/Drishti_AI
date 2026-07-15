@@ -1,19 +1,32 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
+import { AuthProvider } from './context/AuthContext';
+
+// Utilities
 import ScrollToTop from "./components/ScrollToTop";
+
+// New Pages
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
-import Navbar from "./components/HomeComponents/Navbar";
-import Footer from "./components/HomeComponents/Footer";
-import Background from "./components/HomeComponents/Background";
 import ModuleDetail from "./pages/ModuleDetail";
 import ModuleWorkspace from "./pages/ModuleWorkspace";
 import AuthPage from "./pages/AuthPage";
-import ClearanceProfile from "./pages/ClearanceProfile"; 
+import ClearanceProfile from "./pages/ClearanceProfile";
 import CommandSettings from "./pages/CommandSettings";
 
+// Old Pages to keep
+import ScamDetectorPage from './pages/ScamDetectorPage';
+import CurrencyPage from './pages/CurrencyPage';
+import PhishingPage from './pages/PhishingPage';
 
-const FOOTER_HIDDEN_ROUTES = ["/dashboard", "/login"];
+// New Components
+import Navbar from "./components/HomeComponents/Navbar";
+import Footer from "./components/HomeComponents/Footer";
+import Background from "./components/HomeComponents/Background";
+
+// Import App CSS
+import './App.css';
+
+const FOOTER_HIDDEN_ROUTES = ["/dashboard", "/dashboard/scam-detector", "/dashboard/currency", "/login"];
 const NAVBAR_HIDDEN_ROUTES = ["/login"];
 
 function AppContent() {
@@ -30,34 +43,17 @@ function AppContent() {
 
       {showNavbar && <Navbar />}
       
-      {/* 3. Removed the paddingTop style! The Hero component already handles its own padding. */}
       <main className="flex-1 w-full">
-
-      <ScrollToTop /> 
-      <Toaster 
-        position="bottom-right" 
-        toastOptions={{
-          style: {
-            background: '#18181b', // zinc-900
-            color: '#fff',
-            borderRadius: '12px',
-            fontSize: '14px',
-            fontWeight: '600'
-          }
-        }} 
-      />
-
-      
-
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/login" element={<AuthPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          {/* Route for descriptive documentation details */}
+          <Route path="/dashboard/scam-detector" element={<ScamDetectorPage />} />
+          <Route path="/dashboard/currency" element={<CurrencyPage />} />
+          <Route path="/dashboard/phishing" element={<PhishingPage />} />
           <Route path="/module/:id" element={<ModuleDetail />} />
-      
-          {/* Route for isolated live console operations workspace */}
           <Route path="/workspace/:id" element={<ModuleWorkspace />} />
-          <Route path="/login" element={<AuthPage />} /> 
           <Route path="/profile" element={<ClearanceProfile />} />
           <Route path="/settings" element={<CommandSettings />} />
         </Routes>
@@ -68,12 +64,12 @@ function AppContent() {
   );
 }
 
-function App() {
+export default function App() {
   return (
-    <BrowserRouter>
-      <AppContent />
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
-
-export default App;
