@@ -1,70 +1,218 @@
+import { useState, useEffect, useRef, useCallback } from "react";
+import ForceGraph2D from "react-force-graph-2d";
+import { Link } from "react-router-dom";
+
+const API_BASE = "http://localhost:8000/api/v1/fraud-graph";
+
+const NODE_COLORS = {
+  scammer: "#ef4444",
+  mule: "#3b82f6",
+  victim: "#a855f7",
+  voip: "#f97316",
+  crypto: "#eab308",
+  device: "#6b7280",
+  bank: "#06b6d4",
+};
+
+const NODE_EMOJIS = {
+  scammer: "🏢",
+  mule: "💰",
+  victim: "👤",
+  voip: "📞",
+  crypto: "🪙",
+  device: "📱",
+  bank: "🏦",
+};
+
+// Static fallback data for when backend is offline
+const DEMO_GRAPH = {
+  nodes: [
+    { id: 1, label: "Scam Compound", nodeType: "scammer", val: 8 },
+    { id: 2, label: "VOIP Hub", nodeType: "voip", val: 6 },
+    { id: 3, label: "Script Controller", nodeType: "scammer", val: 7 },
+    { id: 4, label: "Victim — Priya", nodeType: "victim", val: 3 },
+    { id: 5, label: "Victim — Rajesh", nodeType: "victim", val: 3 },
+    { id: 6, label: "Mule A (HDFC)", nodeType: "mule", val: 5 },
+    { id: 7, label: "Mule B (ICICI)", nodeType: "mule", val: 5 },
+    { id: 8, label: "Crypto Exchange", nodeType: "crypto", val: 6 },
+  ],
+  links: [
+    { source: 1, target: 2, edgeType: "call" },
+    { source: 2, target: 3, edgeType: "call" },
+    { source: 3, target: 4, edgeType: "call" },
+    { source: 3, target: 5, edgeType: "call" },
+    { source: 4, target: 6, edgeType: "transaction" },
+    { source: 5, target: 7, edgeType: "transaction" },
+    { source: 6, target: 8, edgeType: "fund_relay" },
+    { source: 7, target: 8, edgeType: "fund_relay" },
+  ],
+};
+
+const DEMO_STATS = {
+  total_networks: 3,
+  total_nodes: 29,
+  total_edges: 34,
+  total_fraud_amount_inr: 7150000,
+  max_risk_score: 92.5,
+  critical_networks: 1,
+};
+
+function formatCurrency(amount) {
+  if (!amount) return "₹0";
+  if (amount >= 100000) return `₹${(amount / 100000).toFixed(1)}L`;
+  return `₹${amount}`;
+}
+
 export default function FraudGraph() {
+  const [graphData, setGraphData] = useState(DEMO_GRAPH);
+  const [stats, setStats] = useState(DEMO_STATS);
+  const [isLive, setIsLive] = useState(false);
+  const graphRef = useRef();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [networksRes, statsRes] = await Promise.all([
+          fetch(`${API_BASE}/networks`),
+          fetch(`${API_BASE}/stats`),
+        ]);
+
+        if (networksRes.ok) {
+          const networks = await networksRes.json();
+          // Use highest-risk network for the mini preview
+          if (networks.length > 0) {
+            const top = networks[0];
+            const nodes = (top.nodes || []).map((n) => ({
+              id: n.id,
+              label: n.label,
+              nodeType: n.node_type,
+              val: Math.max(3, (n.risk_score || 50) / 12),
+            }));
+            const links = (top.edges || []).map((e) => ({
+              source: e.source_node_id,
+              target: e.target_node_id,
+              edgeType: e.edge_type,
+            }));
+            if (nodes.length > 0) {
+              setGraphData({ nodes, links });
+              setIsLive(true);
+            }
+          }
+        }
+
+        if (statsRes.ok) {
+          setStats(await statsRes.json());
+        }
+      } catch {
+        // Use demo data
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const paintNode = useCallback((node, ctx, globalScale) => {
+    const color = NODE_COLORS[node.nodeType] || "#6b7280";
+    const size = Math.max(5, node.val * 1.2);
+
+    // Glow
+    ctx.beginPath();
+    ctx.arc(node.x, node.y, size + 3, 0, 2 * Math.PI);
+    ctx.fillStyle = color + "20";
+    ctx.fill();
+
+    // Circle
+    ctx.beginPath();
+    ctx.arc(node.x, node.y, size, 0, 2 * Math.PI);
+    ctx.fillStyle = node.nodeType === "victim" ? "#18181b" : color;
+    ctx.fill();
+    if (node.nodeType === "victim") {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    // Emoji
+    ctx.font = `${size * 0.8}px serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(NODE_EMOJIS[node.nodeType] || "📌", node.x, node.y);
+
+    // Label
+    if (globalScale > 0.8) {
+      const fontSize = Math.max(8, 10 / globalScale);
+      ctx.font = `${fontSize}px Inter, system-ui, sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      const label = node.label.length > 16 ? node.label.slice(0, 14) + "…" : node.label;
+      ctx.fillStyle = "#a1a1aa";
+      ctx.fillText(label, node.x, node.y + size + 3);
+    }
+  }, []);
+
   return (
-    <div className="w-full h-[700px] bg-zinc-950 border border-zinc-800 rounded-2xl shadow-xl overflow-hidden relative flex items-center justify-center">
+    <div className="w-full h-[700px] bg-zinc-950 border border-zinc-800 rounded-2xl shadow-xl overflow-hidden relative flex flex-col">
       
-      {/* Header Overlay */}
-      <div className="absolute top-0 left-0 w-full p-5 flex justify-between items-start z-10">
+      {/* Header */}
+      <div className="absolute top-0 left-0 w-full p-5 flex justify-between items-start z-10 bg-gradient-to-b from-zinc-950/90 to-transparent pointer-events-none">
         <div>
           <h2 className="text-lg font-bold text-white">Fraud Graph Intelligence</h2>
-          <p className="text-xs text-zinc-400 font-medium">Cluster ID: #FN-104 (Cross-Border Digital Arrest)</p>
+          <p className="text-xs text-zinc-400 font-medium">
+            {isLive ? "Live" : "Demo"} Preview • Highest-risk network
+          </p>
         </div>
-        <span className="px-3 py-1 bg-violet-500/20 border border-violet-500/30 rounded text-xs text-violet-400 font-bold uppercase tracking-wider">
-          AI Graph Generated
-        </span>
+        <div className="flex items-center gap-2 pointer-events-auto">
+          <Link
+            to="/workspace/fraud-graph"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3 py-1.5 bg-violet-500/20 hover:bg-violet-500/30 text-violet-400 text-xs font-bold rounded-lg border border-violet-500/30 transition-colors"
+          >
+            Open Full Workspace →
+          </Link>
+          <span className="px-3 py-1 bg-violet-500/20 border border-violet-500/30 rounded text-xs text-violet-400 font-bold uppercase tracking-wider">
+            AI Graph
+          </span>
+        </div>
       </div>
 
-      {/* SVG Connections (Lines) */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none">
-        <line x1="50%" y1="30%" x2="50%" y2="50%" stroke="#52525b" strokeWidth="2" strokeDasharray="4 4" />
-        <line x1="50%" y1="50%" x2="35%" y2="70%" stroke="#52525b" strokeWidth="2" strokeDasharray="4 4" />
-        <line x1="50%" y1="50%" x2="65%" y2="70%" stroke="#52525b" strokeWidth="2" strokeDasharray="4 4" />
-        <line x1="65%" y1="70%" x2="80%" y2="55%" stroke="#ef4444" strokeWidth="2" />
-      </svg>
-
-      {/* Node 1: Origin (Top) */}
-      <div className="absolute top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-        <div className="w-14 h-14 bg-zinc-900 border-2 border-red-500 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(239,68,68,0.3)] z-10">
-          <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>
-        </div>
-        <span className="mt-2 text-xs font-bold text-white bg-zinc-900 px-2 py-1 rounded border border-zinc-800">Scam Call Center</span>
-        <span className="text-[10px] text-zinc-500 mt-1">IP: 45.22.19.11</span>
+      {/* Stats Bar */}
+      <div className="absolute bottom-0 left-0 w-full px-5 py-3 bg-gradient-to-t from-zinc-950/90 to-transparent z-10 flex items-center gap-6 text-[11px] text-zinc-500 font-medium pointer-events-none">
+        <span>Networks: <span className="text-zinc-300 font-mono">{stats.total_networks}</span></span>
+        <span>Nodes: <span className="text-zinc-300 font-mono">{stats.total_nodes}</span></span>
+        <span>Edges: <span className="text-zinc-300 font-mono">{stats.total_edges}</span></span>
+        <span>Peak Risk: <span className="text-red-400 font-mono">{stats.max_risk_score}</span></span>
+        <span>Total Fraud: <span className="text-amber-400 font-mono">{formatCurrency(stats.total_fraud_amount_inr)}</span></span>
       </div>
 
-      {/* Node 2: The Caller (Center) */}
-      <div className="absolute top-[50%] left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-        <div className="w-16 h-16 bg-zinc-900 border-2 border-orange-500 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(249,115,22,0.3)] z-10">
-          <svg className="w-7 h-7 text-orange-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
-        </div>
-        <span className="mt-2 text-xs font-bold text-white bg-zinc-900 px-2 py-1 rounded border border-zinc-800">Spoofed Number</span>
-        <span className="text-[10px] text-zinc-500 mt-1">+91 98XXX XXXXX</span>
+      {/* Force Graph */}
+      <div className="flex-1">
+        <ForceGraph2D
+          ref={graphRef}
+          graphData={graphData}
+          nodeCanvasObject={paintNode}
+          nodeRelSize={6}
+          linkColor={(link) => {
+            if (link.edgeType === "transaction" || link.edgeType === "fund_relay") return "#ef444460";
+            if (link.edgeType === "call") return "#a855f740";
+            return "#52525b40";
+          }}
+          linkWidth={(link) => (link.edgeType === "transaction" ? 2 : 1)}
+          linkLineDash={(link) => (link.edgeType === "call" || link.edgeType === "device_link" ? [4, 4] : [])}
+          linkDirectionalParticles={(link) =>
+            link.edgeType === "transaction" || link.edgeType === "fund_relay" ? 2 : 0
+          }
+          linkDirectionalParticleWidth={2}
+          linkDirectionalParticleColor={() => "#ef4444"}
+          linkDirectionalParticleSpeed={0.004}
+          backgroundColor="#09090b"
+          cooldownTicks={60}
+          d3AlphaDecay={0.03}
+          d3VelocityDecay={0.35}
+          enableNodeDrag={true}
+          enableZoomInteraction={true}
+        />
       </div>
-
-      {/* Node 3: Mule Account A (Bottom Left) */}
-      <div className="absolute top-[70%] left-[35%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-        <div className="w-14 h-14 bg-zinc-900 border-2 border-blue-500 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.3)] z-10">
-          <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-        </div>
-        <span className="mt-2 text-xs font-bold text-white bg-zinc-900 px-2 py-1 rounded border border-zinc-800">Mule A (HDFC)</span>
-        <span className="text-[10px] text-zinc-500 mt-1">₹4.2L Transferred</span>
-      </div>
-
-      {/* Node 4: Mule Account B (Bottom Right) */}
-      <div className="absolute top-[70%] left-[65%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-        <div className="w-14 h-14 bg-zinc-900 border-2 border-blue-500 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.3)] z-10">
-          <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-        </div>
-        <span className="mt-2 text-xs font-bold text-white bg-zinc-900 px-2 py-1 rounded border border-zinc-800">Mule B (ICICI)</span>
-        <span className="text-[10px] text-zinc-500 mt-1">₹1.8L Transferred</span>
-      </div>
-
-      {/* Node 5: The Ultimate Target / Cash out (Far Right) */}
-      <div className="absolute top-[55%] left-[80%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-        <div className="w-12 h-12 bg-red-500/10 border-2 border-red-500 rounded-lg flex items-center justify-center shadow-[0_0_20px_rgba(239,68,68,0.3)] z-10">
-          <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5" /></svg>
-        </div>
-        <span className="mt-2 text-xs font-bold text-white bg-zinc-900 px-2 py-1 rounded border border-zinc-800">Crypto Exchange</span>
-      </div>
-
     </div>
   );
 }

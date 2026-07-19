@@ -105,7 +105,7 @@ A single, extensible platform that combines **Agentic AI**, **Computer Vision**,
 
 | Module | Description | Status |
 |---|---|---|
-| **Digital Arrest Shield** | Real-time AI classifier monitoring communications to flag psychological hostage scenarios. Detects call flow sequences, number spoofing, and script templates. | `Active Prototype` |
+
 | **FICN Vision Agent** | Computer vision architecture for mobile devices, bank counters, and POS terminals. Identifies counterfeit notes via microprint and UV feature analysis. | `Active Prototype` |
 | **Fraud Graph Intelligence** | Graph AI agent that clusters victim reports, scammer infrastructure, and money mule networks across jurisdictions. | `Architecture Phase` |
 | **Citizen Fraud Shield** | Conversational AI accessible via WhatsApp, IVR, and Web for real-time fraud risk assessment in 12 regional languages. | `In Development` |
@@ -440,7 +440,7 @@ Navigate to `/dashboard` to access the operational command center:
 ### Module Documentation
 
 Navigate to `/module/<module-id>` to view detailed documentation for each module:
-- `/module/digital-arrest-shield`
+
 - `/module/ficn-vision`
 - `/module/fraud-graph`
 - `/module/citizen-shield`
@@ -780,7 +780,7 @@ services:
 - [ ] 🔲 Reports page (navigation shows "Soon" badge)
 - [ ] 🔲 Search functionality (search icon exists, no implementation)
 - [ ] 🔲 User authentication (profile menu exists, no auth flow)
-- [ ] 🔲 Digital Arrest Shield workspace console
+
 - [ ] 🔲 Fraud Graph Intelligence workspace console
 - [ ] 🔲 Citizen Fraud Shield workspace console
 - [ ] 🔲 Real database integration (currently static/mock data)

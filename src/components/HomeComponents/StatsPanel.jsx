@@ -1,3 +1,5 @@
+import { motion } from "framer-motion";
+
 const stats = [
   {
     value: "1.14M+",
@@ -57,15 +59,25 @@ export default function StatsPanel() {
   return (
     <section className="w-full max-w-7xl mx-auto px-6 pb-24 pt-8">
       {/* Section Header */}
-      <div className="mb-12 text-center md:text-left">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6 }}
+        className="mb-12 text-center md:text-left"
+      >
         <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">The Threat Landscape</h2>
         <p className="text-zinc-500 mt-2 text-sm font-medium">Addressing critical vulnerabilities highlighted by MHA & RBI reports.</p>
-      </div>
+      </motion.div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         {stats.map((stat, i) => (
-          <div 
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5, delay: i * 0.1 }}
             key={i} 
             className="relative flex flex-col p-6 rounded-2xl bg-white border border-zinc-200 hover:border-zinc-300 transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl overflow-hidden group"
           >
@@ -87,7 +99,7 @@ export default function StatsPanel() {
             <p className="relative text-sm text-zinc-600 mt-2 leading-relaxed">
               {stat.description}
             </p>
-          </div>
+          </motion.div>
         ))}
       </div>
     </section>

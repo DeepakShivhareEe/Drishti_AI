@@ -1,8 +1,9 @@
 import { useParams, Navigate } from "react-router-dom";
 import FicnVisionUi from "../components/ModuleComponents/FicnVisionUi";
+import FraudGraphWorkspace from "../components/ModuleComponents/FraudGraphWorkspace";
+import CitizenShieldWorkspace from "../components/ModuleComponents/CitizenShieldWorkspace";
 
 const WORKSPACE_TITLES = {
-  "digital-arrest-shield": "Digital Arrest Shield Console",
   "ficn-vision": "FICN Vision Verification Workspace",
   "fraud-graph": "Fraud Graph Intelligence Graph View",
   "citizen-shield": "Citizen Fraud Shield Control Panel",
@@ -24,6 +25,10 @@ export default function ModuleWorkspace() {
         <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
           {id === "ficn-vision" ? (
             <FicnVisionUi />
+          ) : id === "fraud-graph" ? (
+            <FraudGraphWorkspace />
+          ) : id === "citizen-shield" ? (
+            <CitizenShieldWorkspace />
           ) : (
             /* Fallback sleek terminal viewcards for tools currently mid-build */
             <div className="w-full bg-white rounded-2xl border border-zinc-200 shadow-sm p-12 text-center flex flex-col items-center justify-center min-h-[400px]">

@@ -96,7 +96,6 @@ export default function Navbar() {
       to: "#",
       enabled: true,
       dropdown: [
-        { label: "Digital Arrest Shield", path: "/module/digital-arrest-shield" },
         { label: "FICN Vision Agent", path: "/module/ficn-vision" },
         { label: "Fraud Graph Intelligence", path: "/module/fraud-graph" },
         { label: "Citizen Fraud Shield", path: "/module/citizen-shield" },

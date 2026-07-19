@@ -141,14 +141,6 @@ export default function ClearanceProfile() {
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 
-                {/* Active Enterprise Card */}
-                <Link to="/module/digital-arrest-shield" className="flex items-center justify-between p-4 rounded-lg bg-white border border-zinc-200 border-l-4 border-l-emerald-500 hover:border-zinc-300 hover:shadow-md transition-all group cursor-pointer">
-                  <div className="flex flex-col">
-                    <span className="text-sm font-bold text-zinc-900 mb-0.5">Digital Arrest Shield</span>
-                    <span className="text-[10px] font-mono text-emerald-600 uppercase tracking-widest">Status: Active</span>
-                  </div>
-                  <svg className="w-4 h-4 text-zinc-300 group-hover:text-zinc-600 transition-colors" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
-                </Link>
 
                 {/* Active Enterprise Card */}
                 <Link to="/module/ficn-vision" className="flex items-center justify-between p-4 rounded-lg bg-white border border-zinc-200 border-l-4 border-l-emerald-500 hover:border-zinc-300 hover:shadow-md transition-all group cursor-pointer">

@@ -28,7 +28,6 @@ export default function Footer() {
             </h4>
             <div className="flex flex-col gap-2.5">
               <Link to="/dashboard" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">Dashboard</Link>
-              <Link to="/module/digital-arrest-shield" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">Digital Arrest Shield</Link>
               <Link to="/module/ficn-vision" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">FICN Vision Agent</Link>
               <Link to="/module/fraud-graph" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">Fraud Graph Intelligence</Link>
               <Link to="/module/citizen-shield" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">Citizen Fraud Shield</Link>
@@ -41,9 +40,10 @@ export default function Footer() {
               Resources
             </h4>
             <div className="flex flex-col gap-2.5">
-              <a href="#" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">NCRB Portal</a>
-              <a href="#" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">Training Manuals</a>
-              <a href="#" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">API Documentation</a>
+              <a href="https://ncrb.gov.in/" target="_blank" rel="noopener noreferrer" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">NCRB Portal</a>
+              <a href="https://cybercrime.gov.in/" target="_blank" rel="noopener noreferrer" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">Cyber Crime Portal</a>
+              <Link to="/training" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">Training Manuals</Link>
+              <Link to="/api-access" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">API Documentation</Link>
             </div>
           </div>
 
@@ -53,9 +53,10 @@ export default function Footer() {
               Support
             </h4>
             <div className="flex flex-col gap-2.5">
-              <a href="#" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">Help Center</a>
-              <a href="#" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">Privacy Policy</a>
-              <a href="#" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">Terms</a>
+              <Link to="/contact-us" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">Help Center</Link>
+              <Link to="/privacy-policy" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">Privacy Policy</Link>
+              <Link to="/terms-and-conditions" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">Terms of Service</Link>
+              <Link to="/faqs" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">FAQs</Link>
             </div>
           </div>
 

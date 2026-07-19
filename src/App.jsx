@@ -12,6 +12,14 @@ import ClearanceProfile from "./pages/ClearanceProfile";
 import CommandSettings from "./pages/CommandSettings";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+// Dedicated Footer Pages
+import TrainingManuals from "./pages/TrainingManuals";
+import ApiDocumentation from "./pages/ApiDocumentation";
+import HelpCenter from "./pages/HelpCenter";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import Faqs from "./pages/Faqs";
+
 // Old Pages to keep
 import PhishingPage from './pages/PhishingPage';
 
@@ -47,6 +55,15 @@ function AppContent() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<AuthPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          
+          {/* ── Footer Pages ───────────────────────────────── */}
+          <Route path="/training" element={<TrainingManuals />} />
+          <Route path="/api-access" element={<ApiDocumentation />} />
+          <Route path="/contact-us" element={<HelpCenter />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-and-conditions" element={<TermsOfService />} />
+          <Route path="/faqs" element={<Faqs />} />
+
           {/* ── Protected Routes ────────────────────────────── */}
           <Route path="/module/:id" element={<ProtectedRoute><ModuleDetail /></ProtectedRoute>} />
           <Route path="/workspace/:id" element={<ProtectedRoute><ModuleWorkspace /></ProtectedRoute>} />

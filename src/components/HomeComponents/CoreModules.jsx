@@ -1,27 +1,8 @@
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 
 export default function CoreModules() {
   const modules = [
-    {
-      id: "digital-arrest-shield",
-      title: "Digital Arrest Shield",
-      tagline: "Predictive Hostage Scenario Intervention",
-      description: "A real-time AI classifier that monitors active communications to flag psychological hostage scenarios before financial transfer occurs. Alerts are automatically routed to telecom providers and the MHA.",
-      features: [
-        "Call flow sequence & script template tracking",
-        "Number spoofing signature detection",
-        "Video call metadata & deepfake analysis"
-      ],
-      icon: (
-        <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
-      ),
-      color: "text-red-600",
-      bgColor: "bg-red-50",
-      borderColor: "border-red-100",
-      tech: ["NLP", "Speech AI", "Telecom API"],
-    },
     {
       id: "ficn-vision",
       title: "FICN Vision Agent",
@@ -109,19 +90,29 @@ export default function CoreModules() {
       <div className="max-w-5xl mx-auto px-6">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-20">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
+          className="text-center max-w-3xl mx-auto mb-20"
+        >
           <h2 className="text-3xl md:text-4xl font-extrabold text-zinc-900 tracking-tight">
             Core Intelligence Modules
           </h2>
           <p className="text-zinc-500 mt-4 text-base leading-relaxed font-medium">
             A unified suite designed to shift law enforcement from reactive investigation to predictive threat neutralisation. Select a module to explore the architecture.
           </p>
-        </div>
+        </motion.div>
 
         {/* Stacked Layout */}
         <div className="flex flex-col gap-12 md:gap-16">
           {modules.map((mod, i) => (
-            <div 
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6, delay: i * 0.15 }}
               key={i} 
               className={`flex flex-col md:flex-row gap-8 md:gap-16 pb-12 md:pb-16 ${
                 i !== modules.length - 1 ? "border-b border-zinc-200/80" : ""
@@ -176,7 +167,7 @@ export default function CoreModules() {
                   </Link>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 

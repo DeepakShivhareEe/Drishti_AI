@@ -10,6 +10,8 @@ import random
 
 from sse_starlette.sse import EventSourceResponse
 from api.routes.phishing_scanner import router as phishing_router
+from api.routes.fraud_graph import router as fraud_graph_router, broadcast_graph_queues
+from api.routes.citizen_shield import router as citizen_shield_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("DRISHTI_HUB")
@@ -114,7 +116,20 @@ async def threat_spawner_loop():
         for queue in broadcast_queues:
             await queue.put(broadcast_payload)
 
-        logger.info(f"⚡ SPAWNED: [{threat_level}] {category} at {target['city']} (ID {new_id}) → {len(broadcast_queues)} listener(s)")
+        # Upgrade #4: Also broadcast to fraud graph SSE listeners
+        graph_payload = {
+            "event": "new_fraud_node",
+            "node_id": new_id,
+            "category": category,
+            "city": target["city"],
+            "threat_level": threat_level,
+            "latitude": lat,
+            "longitude": lon,
+        }
+        for gq in broadcast_graph_queues:
+            await gq.put(graph_payload)
+
+        logger.info(f"⚡ SPAWNED: [{threat_level}] {category} at {target['city']} (ID {new_id}) → {len(broadcast_queues)} map + {len(broadcast_graph_queues)} graph listener(s)")
 
 
 @asynccontextmanager
@@ -129,8 +144,10 @@ async def lifespan(app):
 
 app = FastAPI(title="DRISHTI Command Center Hub", lifespan=lifespan)
 
-# Mount new phishing router
+# Mount routers
 app.include_router(phishing_router)
+app.include_router(fraud_graph_router)
+app.include_router(citizen_shield_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -170,6 +187,62 @@ def init_db():
         )
     """)
 
+    # ── Fraud Graph Intelligence tables ──
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS fraud_networks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            description TEXT,
+            risk_score REAL DEFAULT 0.0,
+            status TEXT DEFAULT 'Active',
+            jurisdiction TEXT,
+            total_amount_inr REAL DEFAULT 0.0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS fraud_nodes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            network_id INTEGER NOT NULL,
+            node_type TEXT NOT NULL,
+            label TEXT NOT NULL,
+            metadata_json TEXT DEFAULT '{}',
+            latitude REAL,
+            longitude REAL,
+            city TEXT,
+            risk_score REAL DEFAULT 0.0,
+            FOREIGN KEY (network_id) REFERENCES fraud_networks(id)
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS fraud_edges (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            network_id INTEGER NOT NULL,
+            source_node_id INTEGER NOT NULL,
+            target_node_id INTEGER NOT NULL,
+            edge_type TEXT NOT NULL,
+            weight REAL DEFAULT 1.0,
+            metadata_json TEXT DEFAULT '{}',
+            FOREIGN KEY (network_id) REFERENCES fraud_networks(id),
+            FOREIGN KEY (source_node_id) REFERENCES fraud_nodes(id),
+            FOREIGN KEY (target_node_id) REFERENCES fraud_nodes(id)
+        )
+    """)
+
+    # ── Citizen Shield assessment log ──
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS citizen_assessments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            context_type TEXT NOT NULL,
+            user_message TEXT NOT NULL,
+            verdict TEXT,
+            risk_score REAL,
+            risk_level TEXT,
+            response_json TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
     # Seed default threat nodes if table is empty
     cursor.execute("SELECT COUNT(*) FROM threat_nodes")
     if cursor.fetchone()[0] == 0:
@@ -195,10 +268,15 @@ def init_db():
         """, seed_data)
         logger.info("📍 Seeded 12 default threat nodes into the database.")
 
+    # ── Seed demo fraud networks ──
+    cursor.execute("SELECT COUNT(*) FROM fraud_networks")
+    if cursor.fetchone()[0] == 0:
+        _seed_fraud_networks(cursor)
+        logger.info("🕸️ Seeded 3 demo fraud networks with nodes and edges.")
+
     conn.commit()
     conn.close()
 
-init_db()
 
 # Global queue list for SSE broadcasting
 broadcast_queues: list[asyncio.Queue] = []
@@ -384,6 +462,166 @@ async def stream_nodes(request: Request):
             broadcast_queues.remove(queue)
     return EventSourceResponse(generator())
 
+
+# ─────────────────────────────────────────────────────────
+# ── FRAUD NETWORK SEED DATA
+# ─────────────────────────────────────────────────────────
+
+def _seed_fraud_networks(cursor):
+    """Seed 3 realistic demo fraud networks with nodes and edges."""
+    import json as _json
+
+    # ══════════════════════════════════════════
+    # Network 1: Cross-Border Digital Arrest Ring
+    # ══════════════════════════════════════════
+    cursor.execute("""
+        INSERT INTO fraud_networks (name, description, risk_score, status, jurisdiction, total_amount_inr)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (
+        "Cross-Border Digital Arrest Ring",
+        "Organised syndicate operating from Myanmar/Cambodia compounds, impersonating CBI/ED officers via VOIP calls to trap victims in multi-day digital arrest scenarios. Funds routed through cascaded mule accounts to crypto exchanges.",
+        92.5, "Active", "Pan-India (Delhi, Mumbai, Bengaluru)", 1760000
+    ))
+    net1_id = cursor.lastrowid
+
+    # Nodes for Network 1
+    net1_nodes = [
+        (net1_id, "scammer", "Scam Compound (Myanmar)", _json.dumps({"country": "Myanmar", "ip": "45.22.19.11", "agents": 15}), 21.9162, 95.9560, "Myawaddy, Myanmar", 95),
+        (net1_id, "voip", "VOIP Spoofing Hub", _json.dumps({"provider": "Spoofed TRAI CallerID", "numbers_used": 47, "ip": "103.14.55.9"}), 22.5726, 88.3639, "Kolkata, WB", 88),
+        (net1_id, "scammer", "Script Controller", _json.dumps({"role": "Scam script manager", "scripts": ["CBI warrant", "ED investigation", "Customs seizure"]}), 28.6139, 77.2090, "New Delhi, DL", 90),
+        (net1_id, "victim", "Victim — Priya S.", _json.dumps({"age": 58, "amount_lost": 420000, "duration_hours": 36, "city": "Mumbai"}), 19.0760, 72.8777, "Mumbai, MH", 10),
+        (net1_id, "victim", "Victim — Rajesh K.", _json.dumps({"age": 65, "amount_lost": 680000, "duration_hours": 48, "city": "Bengaluru"}), 12.9716, 77.5946, "Bengaluru, KA", 10),
+        (net1_id, "victim", "Victim — Anita M.", _json.dumps({"age": 52, "amount_lost": 310000, "duration_hours": 24, "city": "Pune"}), 18.5204, 73.8567, "Pune, MH", 10),
+        (net1_id, "mule", "Mule A (HDFC)", _json.dumps({"bank": "HDFC Bank", "account_type": "Savings", "turnover": 420000}), 19.0760, 72.8777, "Mumbai, MH", 75),
+        (net1_id, "mule", "Mule B (ICICI)", _json.dumps({"bank": "ICICI Bank", "account_type": "Current", "turnover": 680000}), 12.9716, 77.5946, "Bengaluru, KA", 72),
+        (net1_id, "mule", "Mule C (SBI)", _json.dumps({"bank": "State Bank of India", "account_type": "Savings", "turnover": 350000}), 28.6139, 77.2090, "New Delhi, DL", 70),
+        (net1_id, "mule", "Mule D (Axis)", _json.dumps({"bank": "Axis Bank", "account_type": "Savings", "turnover": 310000}), 18.5204, 73.8567, "Pune, MH", 68),
+        (net1_id, "crypto", "Crypto Exchange (WazirX)", _json.dumps({"platform": "WazirX", "wallet": "0x7f3a...b2c1", "total_converted": 1450000}), 19.0760, 72.8777, "Mumbai, MH", 85),
+        (net1_id, "device", "Device #4A2F", _json.dumps({"type": "Android", "imei": "35678901234", "model": "Redmi Note 12"}), 28.6139, 77.2090, "New Delhi, DL", 45),
+    ]
+    cursor.executemany("""
+        INSERT INTO fraud_nodes (network_id, node_type, label, metadata_json, latitude, longitude, city, risk_score)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, net1_nodes)
+    n1_start = cursor.lastrowid - len(net1_nodes) + 1
+
+    # Edges for Network 1 (node IDs are n1_start + offset)
+    net1_edges = [
+        (net1_id, n1_start+0, n1_start+1, "call", 5.0, _json.dumps({"calls": 234, "duration_total_min": 1890})),
+        (net1_id, n1_start+1, n1_start+2, "call", 4.0, _json.dumps({"calls": 156, "script_relay": True})),
+        (net1_id, n1_start+2, n1_start+3, "call", 3.0, _json.dumps({"duration_min": 2160, "impersonation": "CBI Officer"})),
+        (net1_id, n1_start+2, n1_start+4, "call", 3.0, _json.dumps({"duration_min": 2880, "impersonation": "ED Officer"})),
+        (net1_id, n1_start+2, n1_start+5, "call", 2.5, _json.dumps({"duration_min": 1440, "impersonation": "Customs"})),
+        (net1_id, n1_start+3, n1_start+6, "transaction", 4.2, _json.dumps({"amount": 420000, "method": "NEFT", "date": "2024-08-12"})),
+        (net1_id, n1_start+4, n1_start+7, "transaction", 6.8, _json.dumps({"amount": 680000, "method": "RTGS", "date": "2024-08-14"})),
+        (net1_id, n1_start+5, n1_start+9, "transaction", 3.1, _json.dumps({"amount": 310000, "method": "UPI", "date": "2024-08-15"})),
+        (net1_id, n1_start+6, n1_start+8, "fund_relay", 3.5, _json.dumps({"amount": 350000, "hop": 1})),
+        (net1_id, n1_start+7, n1_start+8, "fund_relay", 5.0, _json.dumps({"amount": 500000, "hop": 1})),
+        (net1_id, n1_start+8, n1_start+10, "transaction", 8.0, _json.dumps({"amount": 1450000, "method": "Crypto Purchase"})),
+        (net1_id, n1_start+9, n1_start+10, "fund_relay", 2.5, _json.dumps({"amount": 250000, "hop": 2})),
+        (net1_id, n1_start+11, n1_start+2, "device_link", 2.0, _json.dumps({"shared_imei": True})),
+        (net1_id, n1_start+11, n1_start+8, "device_link", 1.5, _json.dumps({"shared_imei": True})),
+    ]
+    cursor.executemany("""
+        INSERT INTO fraud_edges (network_id, source_node_id, target_node_id, edge_type, weight, metadata_json)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, net1_edges)
+
+    # ══════════════════════════════════════════
+    # Network 2: FICN Distribution Syndicate
+    # ══════════════════════════════════════════
+    cursor.execute("""
+        INSERT INTO fraud_networks (name, description, risk_score, status, jurisdiction, total_amount_inr)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (
+        "FICN Distribution Syndicate",
+        "Counterfeit currency printing and distribution network operating across Tamil Nadu, Gujarat, and Uttar Pradesh. High-quality Rs 500 FICN notes with near-perfect security features.",
+        85.0, "Active", "TN, GJ, UP, MH", 4500000
+    ))
+    net2_id = cursor.lastrowid
+
+    net2_nodes = [
+        (net2_id, "scammer", "FICN Print Lab", _json.dumps({"quality": "Super-fake Rs 500", "monthly_output": 50000, "equipment": "Offset press"}), 13.0827, 80.2707, "Chennai, TN", 95),
+        (net2_id, "mule", "Distribution Cell — West", _json.dumps({"region": "Gujarat", "couriers": 5}), 23.0225, 72.5714, "Ahmedabad, GJ", 78),
+        (net2_id, "mule", "Distribution Cell — North", _json.dumps({"region": "UP", "couriers": 8}), 26.8467, 80.9462, "Lucknow, UP", 80),
+        (net2_id, "mule", "Distribution Cell — Central", _json.dumps({"region": "MP", "couriers": 4}), 23.2599, 77.4126, "Bhopal, MP", 72),
+        (net2_id, "bank", "Banking Deposit Point — HDFC", _json.dumps({"branch": "Ahmedabad Main", "deposits": 12}), 23.0225, 72.5714, "Ahmedabad, GJ", 60),
+        (net2_id, "bank", "Banking Deposit Point — PNB", _json.dumps({"branch": "Lucknow Civil Lines", "deposits": 18}), 26.8467, 80.9462, "Lucknow, UP", 65),
+        (net2_id, "bank", "Banking Deposit Point — BOB", _json.dumps({"branch": "Bhopal MP Nagar", "deposits": 9}), 23.2599, 77.4126, "Bhopal, MP", 55),
+        (net2_id, "scammer", "Hawala Tunnel Exit", _json.dumps({"destination": "Nepal/Bangladesh", "weekly_volume": 800000}), 26.4499, 80.3319, "Kanpur, UP", 88),
+        (net2_id, "device", "Courier Phone #1", _json.dumps({"type": "Feature phone", "numbers": ["+91-70XXX12345", "+91-70XXX12346"]}), 21.1702, 72.8311, "Surat, GJ", 40),
+    ]
+    cursor.executemany("""
+        INSERT INTO fraud_nodes (network_id, node_type, label, metadata_json, latitude, longitude, city, risk_score)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, net2_nodes)
+    n2_start = cursor.lastrowid - len(net2_nodes) + 1
+
+    net2_edges = [
+        (net2_id, n2_start+0, n2_start+1, "account_link", 4.0, _json.dumps({"method": "Courier dispatch", "frequency": "Weekly"})),
+        (net2_id, n2_start+0, n2_start+2, "account_link", 5.0, _json.dumps({"method": "Courier dispatch", "frequency": "Bi-weekly"})),
+        (net2_id, n2_start+0, n2_start+3, "account_link", 3.0, _json.dumps({"method": "Courier dispatch", "frequency": "Monthly"})),
+        (net2_id, n2_start+1, n2_start+4, "transaction", 3.5, _json.dumps({"fake_notes_deposited": 120, "denomination": 500})),
+        (net2_id, n2_start+2, n2_start+5, "transaction", 4.5, _json.dumps({"fake_notes_deposited": 180, "denomination": 500})),
+        (net2_id, n2_start+3, n2_start+6, "transaction", 2.5, _json.dumps({"fake_notes_deposited": 90, "denomination": 500})),
+        (net2_id, n2_start+4, n2_start+7, "fund_relay", 4.0, _json.dumps({"method": "Hawala", "amount": 300000})),
+        (net2_id, n2_start+5, n2_start+7, "fund_relay", 5.0, _json.dumps({"method": "Hawala", "amount": 450000})),
+        (net2_id, n2_start+6, n2_start+7, "fund_relay", 2.0, _json.dumps({"method": "Hawala", "amount": 180000})),
+        (net2_id, n2_start+8, n2_start+1, "device_link", 1.5, _json.dumps({"shared_number": True})),
+        (net2_id, n2_start+8, n2_start+2, "device_link", 1.5, _json.dumps({"shared_number": True})),
+    ]
+    cursor.executemany("""
+        INSERT INTO fraud_edges (network_id, source_node_id, target_node_id, edge_type, weight, metadata_json)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, net2_edges)
+
+    # ══════════════════════════════════════════
+    # Network 3: SIM Swap + Phishing Campaign
+    # ══════════════════════════════════════════
+    cursor.execute("""
+        INSERT INTO fraud_networks (name, description, risk_score, status, jurisdiction, total_amount_inr)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (
+        "SIM Swap + Phishing Campaign",
+        "Coordinated phishing call center operation that harvests credentials via fake KYC update calls, then executes SIM swaps to take over bank accounts. Operating across Hyderabad, Surat, and Patna.",
+        78.0, "Active", "TS, GJ, BR", 890000
+    ))
+    net3_id = cursor.lastrowid
+
+    net3_nodes = [
+        (net3_id, "scammer", "Phishing Call Center", _json.dumps({"scripts": ["KYC Update", "Account Verification"], "agents": 8, "ip": "157.43.20.6"}), 21.1702, 72.8311, "Surat, GJ", 88),
+        (net3_id, "scammer", "SIM Swap Operator A", _json.dumps({"telecom_insider": True, "carrier": "Jio", "swaps_completed": 23}), 17.3850, 78.4867, "Hyderabad, TS", 85),
+        (net3_id, "scammer", "SIM Swap Operator B", _json.dumps({"telecom_insider": False, "carrier": "Airtel", "swaps_completed": 17}), 25.5941, 85.1376, "Patna, BR", 82),
+        (net3_id, "victim", "Victim — Suresh P.", _json.dumps({"age": 45, "amount_lost": 340000, "bank": "SBI"}), 17.3850, 78.4867, "Hyderabad, TS", 10),
+        (net3_id, "victim", "Victim — Meera D.", _json.dumps({"age": 38, "amount_lost": 280000, "bank": "HDFC"}), 25.5941, 85.1376, "Patna, BR", 10),
+        (net3_id, "mule", "Fund Relay Account", _json.dumps({"bank": "PayTM Payments Bank", "turnover": 550000}), 28.4595, 77.0266, "Gurugram, HR", 72),
+        (net3_id, "mule", "Cash-Out Mule", _json.dumps({"method": "ATM Withdrawal", "daily_limit_used": True, "withdrawals": 34}), 26.9124, 75.7873, "Jaipur, RJ", 70),
+        (net3_id, "device", "Shared Burner Phone", _json.dumps({"type": "Samsung J2", "sim_count": 6, "imei": "86754321098"}), 21.1702, 72.8311, "Surat, GJ", 50),
+    ]
+    cursor.executemany("""
+        INSERT INTO fraud_nodes (network_id, node_type, label, metadata_json, latitude, longitude, city, risk_score)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, net3_nodes)
+    n3_start = cursor.lastrowid - len(net3_nodes) + 1
+
+    net3_edges = [
+        (net3_id, n3_start+0, n3_start+1, "call", 3.0, _json.dumps({"credentials_shared": 23, "method": "Fake KYC call"})),
+        (net3_id, n3_start+0, n3_start+2, "call", 2.5, _json.dumps({"credentials_shared": 17, "method": "Fake KYC call"})),
+        (net3_id, n3_start+1, n3_start+3, "account_link", 4.0, _json.dumps({"sim_swapped": True, "bank_otp_intercepted": True})),
+        (net3_id, n3_start+2, n3_start+4, "account_link", 3.5, _json.dumps({"sim_swapped": True, "bank_otp_intercepted": True})),
+        (net3_id, n3_start+3, n3_start+5, "transaction", 3.4, _json.dumps({"amount": 340000, "method": "NEFT"})),
+        (net3_id, n3_start+4, n3_start+5, "transaction", 2.8, _json.dumps({"amount": 280000, "method": "IMPS"})),
+        (net3_id, n3_start+5, n3_start+6, "fund_relay", 5.5, _json.dumps({"amount": 550000, "atm_withdrawals": 34})),
+        (net3_id, n3_start+7, n3_start+0, "device_link", 2.0, _json.dumps({"shared_device": True})),
+        (net3_id, n3_start+7, n3_start+1, "device_link", 1.5, _json.dumps({"shared_sim": True})),
+    ]
+    cursor.executemany("""
+        INSERT INTO fraud_edges (network_id, source_node_id, target_node_id, edge_type, weight, metadata_json)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, net3_edges)
+
+# Initialize database and seed tables
+init_db()
 
 if __name__ == "__main__":
     import uvicorn

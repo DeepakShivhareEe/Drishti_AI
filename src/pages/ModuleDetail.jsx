@@ -3,17 +3,6 @@ import { useEffect, useState } from "react";
 
 const MODULE_DATA = [
   {
-    id: "digital-arrest-shield",
-    name: "Digital Arrest Shield",
-    tagline: "Predictive Hostage Scenario Intervention",
-    description: "A real-time AI classifier that monitors active communications to flag psychological hostage scenarios before financial transfer occurs. It identifies call flow sequences, number spoofing signatures, and script templates commonly used by fraudsters impersonating CBI, ED, or Customs officers.",
-    capabilities: ["Real-time Voice Analysis", "Spoofed Number Detection", "Automated MHA Alerting"],
-    status: "Active Prototype",
-    color: "text-red-600",
-    bgColor: "bg-red-50",
-    borderColor: "border-red-200"
-  },
-  {
     id: "ficn-vision",
     name: "FICN Vision Agent",
     tagline: "Point-of-Contact Currency Verification",
@@ -30,7 +19,7 @@ const MODULE_DATA = [
     tagline: "Cross-Jurisdictional Network Mapping",
     description: "An advanced Graph AI agent that clusters victim reports, scammer infrastructure, and money mule networks. It maps coordinated fraud campaigns across India to generate court-admissible intelligence packages.",
     capabilities: ["Transaction Clustering", "Device Fingerprinting", "Geospatial Linkages"],
-    status: "Architecture Phase",
+    status: "Active Prototype",
     color: "text-violet-600",
     bgColor: "bg-violet-50",
     borderColor: "border-violet-200"
@@ -41,9 +30,10 @@ const MODULE_DATA = [
     tagline: "Omnichannel Public Risk Assessment",
     description: "A conversational AI interface accessible via WhatsApp, IVR, and Web. It walks citizens through real-time fraud risk assessments for suspicious calls or payment requests, offering guidance in 12 regional languages.",
     capabilities: ["Multilingual LLM", "Instant Risk Verdicts", "NCRB Portal Integration"],
-    status: "In Development",
+    status: "Active Prototype",
     color: "text-cyan-600",
     bgColor: "bg-cyan-50",
+    borderColor: "border-cyan-200"
   },
   {
     id: "phishing-scanner",
