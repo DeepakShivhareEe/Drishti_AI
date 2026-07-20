@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import DashboardHeader from "../components/DashboardComponents/DashboardHeader";
 import TopMetrics from "../components/DashboardComponents/TopMetrics";
 import LiveThreatFeed from "../components/DashboardComponents/LiveThreatFeed";
@@ -11,7 +12,12 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-slate-50 pt-24 pb-12 px-4 sm:px-6 lg:px-8"
+    >
       <div className="max-w-[1400px] mx-auto">
         
         <DashboardHeader activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -45,6 +51,6 @@ export default function Dashboard() {
         )}
 
       </div>
-    </div>
+    </motion.div>
   );
 }

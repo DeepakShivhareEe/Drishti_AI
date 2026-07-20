@@ -1,5 +1,6 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
 const MODULE_DATA = [
   {
@@ -65,7 +66,12 @@ export default function ModuleDetail() {
   const otherModules = MODULE_DATA.filter((m) => m.id !== id);
 
   return (
-    <div className="min-h-screen bg-white pt-32 pb-24">
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-white pt-32 pb-24"
+    >
       <div className="max-w-4xl mx-auto px-6">
         
         {/* Breadcrumb */}
@@ -203,6 +209,6 @@ export default function ModuleDetail() {
         </div>
 
       </div>
-    </div>
+    </motion.div>
   );
 }

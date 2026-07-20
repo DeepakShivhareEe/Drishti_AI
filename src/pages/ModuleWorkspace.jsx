@@ -1,4 +1,5 @@
 import { useParams, Navigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import FicnVisionUi from "../components/ModuleComponents/FicnVisionUi";
 import FraudGraphWorkspace from "../components/ModuleComponents/FraudGraphWorkspace";
 import CitizenShieldWorkspace from "../components/ModuleComponents/CitizenShieldWorkspace";
@@ -18,7 +19,12 @@ export default function ModuleWorkspace() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-zinc-50 pt-24 pb-16 px-4 sm:px-6 lg:px-8"
+    >
       <div className="max-w-7xl mx-auto">
         
         {/* Dynamic Interactive Component Ingestion */}
@@ -46,6 +52,6 @@ export default function ModuleWorkspace() {
         </div>
 
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import './PhishingPage.css'
 
 const URL_SAMPLES = [
   { label: 'Safe Link', value: 'https://www.onlinesbi.sbi/' },
@@ -64,7 +63,12 @@ export default function PhishingPage() {
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative z-10">
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      transition={{ duration: 0.5 }}
+      className="min-h-screen pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative z-10"
+    >
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-10">
           <h1 className="text-4xl md:text-5xl font-extrabold text-zinc-900 tracking-tight mb-4">
@@ -84,13 +88,13 @@ export default function PhishingPage() {
             <div className="flex bg-zinc-100 p-1 rounded-xl mb-6">
               <button
                 onClick={() => { setActiveTab('url'); setInputValue(''); setResult(null); }}
-                className={`flex-1 py-2.5 px-4 rounded-lg font-bold text-sm text-center ${activeTab === 'url' ? 'scan-tab active shadow-sm' : 'scan-tab inactive'}`}
+                className={`flex-1 py-2.5 px-4 rounded-lg font-bold text-sm text-center transition-all duration-200 ${activeTab === 'url' ? 'bg-zinc-900 text-white shadow-sm' : 'bg-transparent text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900'}`}
               >
                 🔗 Scan URL
               </button>
               <button
                 onClick={() => { setActiveTab('text'); setInputValue(''); setResult(null); }}
-                className={`flex-1 py-2.5 px-4 rounded-lg font-bold text-sm text-center ${activeTab === 'text' ? 'scan-tab active shadow-sm' : 'scan-tab inactive'}`}
+                className={`flex-1 py-2.5 px-4 rounded-lg font-bold text-sm text-center transition-all duration-200 ${activeTab === 'text' ? 'bg-zinc-900 text-white shadow-sm' : 'bg-transparent text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900'}`}
               >
                 💬 Scan SMS / Text
               </button>
@@ -194,7 +198,12 @@ export default function PhishingPage() {
                     result.risk_level === 'suspicious' ? 'bg-amber-50' : 
                     result.risk_level === 'dangerous' ? 'bg-orange-50' : 'bg-red-50'
                   }`}>
-                    <div className={`threat-gauge mb-4 ${result.risk_level} bg-white`}>
+                    <div className={`relative w-[200px] h-[200px] rounded-full flex items-center justify-center transition-all duration-500 ease-out border-8 mb-4 bg-white ${
+                      result.risk_level === 'safe' ? 'border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.2)]' : 
+                      result.risk_level === 'suspicious' ? 'border-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.2)]' : 
+                      result.risk_level === 'dangerous' ? 'border-orange-500 shadow-[0_0_30px_rgba(249,115,22,0.2)]' : 
+                      'border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.2)]'
+                    }`}>
                       <div className="text-center">
                         <span className={`text-5xl font-extrabold block ${
                           result.risk_level === 'safe' ? 'text-emerald-600' : 
@@ -231,7 +240,7 @@ export default function PhishingPage() {
                   )}
 
                   {/* Findings List */}
-                  <div className="p-5 findings-list bg-white">
+                  <div className="p-5 bg-white [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-zinc-100 [&::-webkit-scrollbar-track]:rounded [&::-webkit-scrollbar-thumb]:bg-zinc-300 [&::-webkit-scrollbar-thumb]:rounded hover:[&::-webkit-scrollbar-thumb]:bg-zinc-400">
                     <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4">Detailed Findings ({result.findings.length})</h4>
                     
                     <div className="flex flex-col gap-3">
@@ -282,6 +291,6 @@ export default function PhishingPage() {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

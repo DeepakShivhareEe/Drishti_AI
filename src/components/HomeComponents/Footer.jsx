@@ -9,12 +9,12 @@ export default function Footer() {
 
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <Link to="/" className="flex items-center gap-2.5 mb-4">
+            <a href="/" className="flex items-center gap-2.5 mb-4">
               <img src={logo} alt="DRISHTI" className="w-14 h-14 rounded-lg object-contain" />
               <span className="text-base font-bold tracking-widest text-zinc-200">
                 DRISHTI
               </span>
-            </Link>
+            </a>
             <p className="text-sm text-zinc-500 leading-relaxed max-w-xs">
               AI-powered digital risk intelligence platform for real-time
               threat detection and predictive fraud prevention.

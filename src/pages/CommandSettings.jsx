@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 
 export default function CommandSettings() {
   const [loading, setLoading] = useState(true);
@@ -30,7 +31,12 @@ export default function CommandSettings() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] pt-28 pb-24 font-sans">
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-[#FAFAFA] pt-28 pb-24 font-sans"
+    >
       <div className="max-w-4xl mx-auto px-6">
         
         {/* Page Header */}
@@ -157,6 +163,6 @@ export default function CommandSettings() {
 
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

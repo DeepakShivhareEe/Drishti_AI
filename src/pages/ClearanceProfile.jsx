@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { auth } from "../firebase"; // Adjust path if your firebase.js is elsewhere
 import { onAuthStateChanged } from "firebase/auth";
+import { motion } from "framer-motion";
 
 export default function ClearanceProfile() {
   const [user, setUser] = useState(null);
@@ -36,7 +37,12 @@ export default function ClearanceProfile() {
   const securityNodeId = `NID-${user.uid.substring(0, 8).toUpperCase()}`;
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] pt-28 pb-24 font-sans">
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-[#FAFAFA] pt-28 pb-24 font-sans"
+    >
       <div className="max-w-6xl mx-auto px-6">
         
         {/* Page Header */}
@@ -207,6 +213,6 @@ export default function ClearanceProfile() {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

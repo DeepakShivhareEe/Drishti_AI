@@ -119,7 +119,7 @@ export default function Navbar() {
       <div className="w-full max-w-7xl mx-auto px-6 lg:px-8 flex items-center justify-between">
         
         {/* ── Left Side: Logo ── */}
-        <Link to="/" className="flex items-center gap-3 group focus:outline-none">
+        <a href="/" className="flex items-center gap-3 group focus:outline-none">
           <img
             src={logo}
             alt="DRISHTI Logo"
@@ -128,7 +128,7 @@ export default function Navbar() {
           <span className="text-xl font-bold tracking-wide text-zinc-900 group-hover:text-black transition-colors duration-300">
             DRISHTI
           </span>
-        </Link>
+        </a>
 
         {/* ── Center: Minimalist Navigation Links ── */}
         <div className="hidden md:flex items-center gap-8">

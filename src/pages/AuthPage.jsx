@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import { signInWithPopup, signInWithRedirect, getRedirectResult } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
 import logo from "../assets/logo.png"; // Ensure this path matches where your logo is!
@@ -52,7 +53,12 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="h-screen flex bg-white overflow-hidden">
+    <motion.div 
+      initial={{ opacity: 0 }} 
+      animate={{ opacity: 1 }} 
+      transition={{ duration: 0.5 }}
+      className="h-screen flex bg-white overflow-hidden"
+    >
       
       {/* ── LEFT SIDE: Branding & Logo (Hidden on mobile) ── */}
       <div className="hidden lg:flex lg:w-1/2 bg-zinc-400 flex-col justify-between p-12 relative overflow-hidden">
@@ -165,6 +171,6 @@ export default function AuthPage() {
 
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
