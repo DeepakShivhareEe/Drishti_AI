@@ -18,6 +18,7 @@ dist-ssr
 *.local
 .env
 .env.*
+microservices/**/.env
 
 # Python
 __pycache__/
