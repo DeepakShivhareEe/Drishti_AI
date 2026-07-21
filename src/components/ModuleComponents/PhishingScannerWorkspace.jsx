@@ -1,39 +1,39 @@
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { fetchWithAuth } from '../utils/api'
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { fetchWithAuth } from '../../utils/api';
 
 const URL_SAMPLES = [
   { label: 'Safe Link', value: 'https://www.onlinesbi.sbi/' },
   { label: 'Typosquat', value: 'http://onlinesbl.sbi-update.com/kyc' },
   { label: 'Suspicious IP', value: 'http://192.168.1.100/secure-login' },
   { label: 'Shortener', value: 'https://bit.ly/3x8Qp9' }
-]
+];
 
 const TEXT_SAMPLES = [
   { label: 'Legitimate SMS', value: 'Dear Customer, your acct XX1234 is credited with Rs 500 on 12-Oct. Available Bal: Rs 1500. - SBI' },
   { label: 'KYC Scam', value: 'Dear customer, your SBI YONO account will be blocked today. Please complete your KYC immediately using this link: http://sbi-kyc-update.buzz/login' },
   { label: 'Lottery Bait', value: 'Congratulations! You have won Rs 50,000 cashback from Google Pay. Claim your reward immediately: https://gpay-prize.tk/claim' },
   { label: 'Digital Arrest Threat', value: 'URGENT: CBI officer Sharma here. A money laundering case (FIR 124) is registered against you. Call back immediately or police will be sent to your location.' }
-]
+];
 
-export default function PhishingPage() {
-  const [activeTab, setActiveTab] = useState('url') // 'url' or 'text'
-  const [inputValue, setInputValue] = useState('')
-  const [isScanning, setIsScanning] = useState(false)
-  const [result, setResult] = useState(null)
-  const [error, setError] = useState(null)
+export default function PhishingScannerWorkspace() {
+  const [activeTab, setActiveTab] = useState('url'); // 'url' or 'text'
+  const [inputValue, setInputValue] = useState('');
+  const [isScanning, setIsScanning] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
 
   const handleScan = async (e) => {
-    e?.preventDefault()
-    if (!inputValue.trim()) return
+    e?.preventDefault();
+    if (!inputValue.trim()) return;
 
-    setIsScanning(true)
-    setError(null)
-    setResult(null)
+    setIsScanning(true);
+    setError(null);
+    setResult(null);
 
     try {
-      const endpoint = activeTab === 'url' ? '/api/phishing/scan-url' : '/api/phishing/scan-text'
-      const payload = activeTab === 'url' ? { url: inputValue } : { text: inputValue }
+      const endpoint = activeTab === 'url' ? '/api/phishing/scan-url' : '/api/phishing/scan-text';
+      const payload = activeTab === 'url' ? { url: inputValue } : { text: inputValue };
 
       const response = await fetchWithAuth(`http://127.0.0.1:8000${endpoint}`, {
         method: 'POST',
@@ -41,50 +41,45 @@ export default function PhishingPage() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(payload)
-      })
+      });
 
       if (!response.ok) {
-        throw new Error('Failed to analyze. Make sure backend is running.')
+        throw new Error('Failed to analyze. Make sure backend is running.');
       }
 
-      const data = await response.json()
-      setResult(data)
+      const data = await response.json();
+      setResult(data);
     } catch (err) {
-      setError(err.message)
+      setError(err.message);
     } finally {
-      setIsScanning(false)
+      setIsScanning(false);
     }
-  }
+  };
 
   const loadSample = (value) => {
-    setInputValue(value)
-    // Clear previous results
-    setResult(null)
-    setError(null)
-  }
+    setInputValue(value);
+    setResult(null);
+    setError(null);
+  };
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 15 }} 
-      animate={{ opacity: 1, y: 0 }} 
-      transition={{ duration: 0.5 }}
-      className="min-h-screen pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative z-10"
-    >
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-10">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-zinc-900 tracking-tight mb-4">
-            Phishing & <span className="text-blue-600">SMS Scanner</span>
-          </h1>
-          <p className="text-xl text-zinc-500 font-medium max-w-2xl mx-auto">
-            Instantly analyze suspicious links, messages, and emails using our offline AI engine. We check for typosquatting, urgency tactics, and brand impersonation.
-          </p>
+    <div className="w-full mt-12 bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
+      {/* Workspace Header */}
+      <div className="p-6 border-b border-zinc-100 bg-zinc-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h3 className="text-lg font-bold text-zinc-900">Live Workspace: Phishing & SMS Scanner</h3>
+          <p className="text-sm text-zinc-500">Instantly analyze suspicious links, messages, and emails using our offline AI engine.</p>
         </div>
+        <span className="self-start sm:self-center px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold uppercase rounded border border-emerald-200 whitespace-nowrap">
+          Agent Online (Port 8000)
+        </span>
+      </div>
 
+      <div className="p-6 md:p-8 bg-zinc-50/50">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           
           {/* LEFT PANEL: Input Area */}
-          <div className="bg-white rounded-2xl shadow-sm border border-zinc-200 p-6 md:p-8 flex flex-col">
-            
+          <div className="bg-white rounded-2xl shadow-sm border border-zinc-200 p-6 flex flex-col">
             {/* Tabs */}
             <div className="flex bg-zinc-100 p-1 rounded-xl mb-6">
               <button
@@ -181,7 +176,7 @@ export default function PhishingPage() {
                 <p className="text-sm">Enter a URL or message on the left to begin forensic analysis.</p>
               </div>
             ) : isScanning ? (
-              <div className="flex-1 flex flex-col items-center justify-center p-12 text-center bg-zinc-50/50">
+              <div className="flex-1 flex flex-col items-center justify-center p-12 text-center bg-zinc-50/50 min-h-[400px]">
                 <div className="w-24 h-24 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-6"></div>
                 <h3 className="text-xl font-bold text-zinc-900 mb-2">Analyzing Patterns...</h3>
                 <p className="text-sm text-zinc-500">Checking against 500+ phishing signatures</p>
@@ -292,6 +287,6 @@ export default function PhishingPage() {
           </div>
         </div>
       </div>
-    </motion.div>
-  )
+    </div>
+  );
 }

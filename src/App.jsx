@@ -23,7 +23,6 @@ import TermsOfService from "./pages/TermsOfService";
 import Faqs from "./pages/Faqs";
 
 // Old Pages to keep
-import PhishingPage from './pages/PhishingPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 // New Components
@@ -34,7 +33,7 @@ import Background from "./components/HomeComponents/Background";
 // Import App CSS
 import './App.css';
 
-const FOOTER_HIDDEN_ROUTES = ["/dashboard", "/dashboard/phishing", "/login"];
+const FOOTER_HIDDEN_ROUTES = ["/dashboard", "/login"];
 const NAVBAR_HIDDEN_ROUTES = ["/login"];
 
 function AppContent() {
@@ -74,8 +73,6 @@ function AppContent() {
           <Route path="/workspace/:id" element={<ProtectedRoute><ModuleWorkspace /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><ClearanceProfile /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><CommandSettings /></ProtectedRoute>} />
-          <Route path="/dashboard/phishing" element={<ProtectedRoute><PhishingPage /></ProtectedRoute>} />
-
           {/* ── 404 Catch-All ────────────────────────────────── */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

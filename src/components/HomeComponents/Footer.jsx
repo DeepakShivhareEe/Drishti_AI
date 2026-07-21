@@ -72,7 +72,7 @@ export default function Footer() {
               © 2026 DRISHTI AI. All rights reserved.
             </p>
             <p className="text-[10px] text-zinc-600 mt-0.5">
-              National Digital Public Safety & Predictive Risk Intelligence Platform.
+              Digital Risk Intelligence & Security for Holistic Threat Identification Platform.
             </p>
           </div>
           <div className="flex items-center gap-2">

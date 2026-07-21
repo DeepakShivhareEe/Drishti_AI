@@ -3,11 +3,13 @@ import { motion } from "framer-motion";
 import FicnVisionUi from "../components/ModuleComponents/FicnVisionUi";
 import FraudGraphWorkspace from "../components/ModuleComponents/FraudGraphWorkspace";
 import CitizenShieldWorkspace from "../components/ModuleComponents/CitizenShieldWorkspace";
+import PhishingScannerWorkspace from "../components/ModuleComponents/PhishingScannerWorkspace";
 
 const WORKSPACE_TITLES = {
   "ficn-vision": "FICN Vision Verification Workspace",
   "fraud-graph": "Fraud Graph Intelligence Graph View",
   "citizen-shield": "Citizen Fraud Shield Control Panel",
+  "phishing-scanner": "Phishing & SMS Scanner Workspace",
 };
 
 export default function ModuleWorkspace() {
@@ -35,6 +37,8 @@ export default function ModuleWorkspace() {
             <FraudGraphWorkspace />
           ) : id === "citizen-shield" ? (
             <CitizenShieldWorkspace />
+          ) : id === "phishing-scanner" ? (
+            <PhishingScannerWorkspace />
           ) : (
             /* Fallback sleek terminal viewcards for tools currently mid-build */
             <div className="w-full bg-white rounded-2xl border border-zinc-200 shadow-sm p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
