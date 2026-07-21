@@ -72,7 +72,7 @@ export default function Footer() {
               © 2026 DRISHTI AI. All rights reserved.
             </p>
             <p className="text-[10px] text-zinc-600 mt-0.5">
-              Digital Risk Intelligence & Security for Holistic Threat Identification Platform.
+              Digital Risk Intelligence & Security Holistic Threat Interceptor.
             </p>
           </div>
           <div className="flex items-center gap-2">

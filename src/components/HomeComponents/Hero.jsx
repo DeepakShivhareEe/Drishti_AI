@@ -29,9 +29,9 @@ export default function Hero() {
       {/* ── Logo & Headline ── */}
       <motion.div variants={itemVariants} className="flex flex-col items-center">
         <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold leading-[1.1] tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-zinc-950 to-zinc-600 drop-shadow-sm">
-          Digital Risk Intelligence & Security <br />
+          Digital Risk Intelligence<br />&  <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-cyan-500">
-            for Holistic Threat Identification.
+            Security Holistic Threat Interceptor
           </span>
         </h1>
       </motion.div>

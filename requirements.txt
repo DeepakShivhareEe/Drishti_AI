@@ -1,26 +1,16 @@
-# DRISHTI Project Dependencies
-# This project uses Node.js, so these are installed via npm/package.json.
+# DRISHTI Python Backend Dependencies
+# Note: Frontend (React) dependencies are managed exclusively in package.json
 
-# Core Dependencies:
-react (^19.2.7)
-react-dom (^19.2.7)
-react-router-dom (^7.18.0)
+# Core Backend Framework
+fastapi==0.128.0
+uvicorn==0.40.0
+sse-starlette==3.4.5
+python-multipart==0.0.30
 
-# 3D & Graphics Libraries:
-three (^0.185.0)
-@react-three/fiber (^9.6.1)
-@react-three/drei (^10.7.7)
+# Authentication & Environment
+firebase-admin==7.5.0
+python-dotenv==1.0.1
 
-# Particle Effects:
-@tsparticles/react (^4.2.1)
-@tsparticles/slim (^4.2.1)
-
-# Styling & Build Tools (Dev Dependencies):
-tailwindcss (^4.3.1)
-@tailwindcss/vite (^4.3.1)
-vite (^8.1.0)
-eslint (and related plugins)
-typescript types (@types/react, @types/react-dom)
-framer-motion
-fastapi uvicorn
-firebase-admin
+# AI & Machine Learning Integrations
+google-generativeai==0.8.3
+google-genai==1.75.0

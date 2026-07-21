@@ -105,10 +105,10 @@ A single, extensible platform that combines **Agentic AI**, **Computer Vision**,
 
 | Module | Description | Status |
 |---|---|---|
-
 | **FICN Vision Agent** | Computer vision architecture for mobile devices, bank counters, and POS terminals. Identifies counterfeit notes via microprint and UV feature analysis. | `Active Prototype` |
-| **Fraud Graph Intelligence** | Graph AI agent that clusters victim reports, scammer infrastructure, and money mule networks across jurisdictions. | `Architecture Phase` |
-| **Citizen Fraud Shield** | Conversational AI accessible via WhatsApp, IVR, and Web for real-time fraud risk assessment in 12 regional languages. | `In Development` |
+| **Fraud Graph Intelligence** | Graph AI agent that clusters victim reports, scammer infrastructure, and money mule networks across jurisdictions. | `Active Workspace` |
+| **Citizen Fraud Shield** | Web-based AI console for real-time fraud risk assessment using dual Gemini AI + deterministic rule engines. | `Active Workspace` |
+| **Phishing & SMS Scanner** | Forensic analysis of suspicious URLs, SMS texts, and emails against 500+ phishing signatures. | `Active Workspace` |
 
 ### 📊 Command Center Dashboard
 
@@ -236,9 +236,11 @@ graph TB
 ```
 drishti/
 ├── backend/                          # Python FastAPI backend
+│   ├── api/                          # Route handlers (phishing, citizen_shield)
+│   ├── core/                         # AI & analysis engines
+│   ├── secrets/                      # Secure storage for Firebase JSON
 │   ├── main.py                       # FastAPI app with CORS & API endpoints
 │   └── __pycache__/                  # Python bytecode cache
-│
 ├── public/                           # Static public assets
 │   ├── favicon.svg                   # Browser tab icon
 │   └── icons.svg                     # SVG icon sprite
@@ -396,6 +398,7 @@ npm run preview
 > [!NOTE]
 > The current codebase uses hardcoded URLs for development simplicity. Below are the variables recommended for production configuration.
 
+### Frontend (.env)
 | Variable | Description | Required | Default / Example |
 |---|---|---|---|
 | `VITE_API_BASE_URL` | FastAPI backend URL | Recommended | `http://localhost:8000` |
@@ -776,13 +779,14 @@ services:
 - [x] ML engine integration for counterfeit detection
 - [x] Module documentation pages with dynamic routing
 - [x] FastAPI backend with dashboard metrics API
-- [ ] 🔲 Analytics page (navigation shows "Soon" badge)
-- [ ] 🔲 Reports page (navigation shows "Soon" badge)
+- [x] Analytics page
+- [x] Reports page
 - [ ] 🔲 Search functionality (search icon exists, no implementation)
 - [ ] 🔲 User authentication (profile menu exists, no auth flow)
 
-- [ ] 🔲 Fraud Graph Intelligence workspace console
-- [ ] 🔲 Citizen Fraud Shield workspace console
+- [x] Fraud Graph Intelligence workspace console
+- [x] Citizen Fraud Shield workspace console
+- [x] Phishing & SMS Scanner workspace console
 - [ ] 🔲 Real database integration (currently static/mock data)
 - [ ] 🔲 WebSocket-based live threat feed (currently `setInterval`)
 
