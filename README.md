@@ -65,7 +65,21 @@ counterfeit currency interception, and fraud network visualization.
 
 ### Problem Statement
 
-India recorded **1.14 million+ cybercrime complaints** in 2023 alone — a staggering 60% year-over-year increase. Digital arrest scams have defrauded citizens of **₹1,776 Crore** in just 9 months through sophisticated psychological hostage scenarios. Meanwhile, Fake Indian Currency Notes (FICN) continue to infiltrate the financial system through POS terminals, ATMs, and bank counters.
+India registered 1.14 million cybercrime complaints in 2023 — up 60% from 2022 — and the trajectory
+has only steepened. The Ministry of Home Affairs reported that 'digital arrest' scams, where fraudsters
+impersonating CBI, ED, or Customs officers trap victims in multi-day psychological hostage situations
+over video call, defrauded citizens of over Rs 1,776 crore in just the first nine months of 2024. These
+are not opportunistic crimes — they are industrialised operations run from fraud compounds, often
+across borders, using spoofed numbers, AI-generated voices, and fake government portals.
+Separately, counterfeit currency remains a persistent threat: the RBI's Annual Report 2025 flagged
+record FICN (Fake Indian Currency Notes) seizures, with high-denomination Rs 500 fakes of sufficient
+quality to defeat manual detection in routine banking operations. What law enforcement lacks is not
+evidence after the fact — it is intelligence before mass victimisation occurs, and reliable tools to detect
+threats at the point of contact rather than the point of complaint. Solving this requires convergence
+of financial transaction intelligence, communication network analysis, physical security (counterfeit
+detection), and real-time public safety coordination — exactly the kind of multi-source, multi-agency
+intelligence problem where AI has the potential to be transformative.
+
 
 ### Solution
 
