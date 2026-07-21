@@ -130,20 +130,18 @@ export default function ModuleDetail() {
           </div>
 
           {/* Architecture Diagram */}
-          {currentModule.id === "phishing-scanner" ? (
-            <>
-              <div className="w-full rounded-2xl border border-zinc-200 bg-white shadow-sm overflow-hidden mb-12">
-                <div className="bg-zinc-50 border-b border-zinc-200 px-6 py-4 flex items-center justify-between">
-                  <h4 className="text-zinc-900 font-bold">System Architecture Flow</h4>
-                  <span className="text-xs font-bold px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg uppercase tracking-wider">v1.0 Engine</span>
-                </div>
-                <div className="bg-zinc-50/50 flex justify-center overflow-hidden">
-                  <div className="relative group cursor-zoom-in w-full flex" onClick={() => setIsImageOpen(true)}>
-                    <img 
-                      src="/phishing-architecture.svg" 
-                      alt="Phishing Scanner Architecture Diagram" 
-                      className="w-full h-auto transition-transform duration-300 group-hover:scale-[1.02]"
-                    />
+          <div className="w-full rounded-2xl border border-zinc-200 bg-white shadow-sm overflow-hidden mb-12">
+            <div className="bg-zinc-50 border-b border-zinc-200 px-6 py-4 flex items-center justify-between">
+              <h4 className="text-zinc-900 font-bold">System Architecture Flow</h4>
+              <span className="text-xs font-bold px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg uppercase tracking-wider">v1.0 Engine</span>
+            </div>
+            <div className="bg-zinc-50/50 flex justify-center overflow-hidden">
+              <div className={`relative group cursor-zoom-in w-full flex justify-center bg-white ${currentModule.id === 'phishing-scanner' ? '' : 'py-10 px-6'}`} onClick={() => setIsImageOpen(true)}>
+                <img 
+                  src={`/${currentModule.id}-architecture.svg`} 
+                  alt={`${currentModule.name} Architecture Diagram`} 
+                  className={`${currentModule.id === 'phishing-scanner' ? 'w-full' : 'max-w-full max-h-[350px] object-contain'} h-auto transition-transform duration-300 group-hover:scale-[1.02]`}
+                />
                     <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
                       <span className="px-4 py-2 bg-white/95 text-zinc-900 text-sm font-bold rounded-lg shadow-sm backdrop-blur-sm flex items-center gap-2">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM10.5 7.5v6m3-3h-6" /></svg>
@@ -165,27 +163,15 @@ export default function ModuleDetail() {
                   </button>
                   <div className="w-full h-full flex items-center justify-center overflow-auto" onClick={(e) => e.stopPropagation()}>
                     <img 
-                      src="/phishing-architecture.svg" 
-                      alt="Phishing Scanner Architecture Diagram (Full)" 
+                      src={`/${currentModule.id}-architecture.svg`} 
+                      alt={`${currentModule.name} Architecture Diagram (Full)`} 
                       className="max-w-none w-auto h-auto min-w-[800px] max-h-[95vh] object-contain rounded-xl bg-white shadow-2xl cursor-zoom-out"
                       onClick={() => setIsImageOpen(false)}
                     />
                   </div>
                 </div>
               )}
-            </>
-          ) : (
-            <div className="w-full rounded-2xl border-2 border-dashed border-zinc-200 bg-zinc-50 flex flex-col items-center justify-center py-24 text-center">
-              <svg className="w-12 h-12 text-zinc-300 mb-4" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-              </svg>
-              <h4 className="text-zinc-900 font-bold mb-1">Architecture Diagram Placeholder</h4>
-              <p className="text-zinc-500 text-sm max-w-sm">
-                Insert your detailed architecture diagram or code flow for {currentModule.name} here.
-              </p>
-            </div>
-          )}
-        </div>
+          </div>
 
         {/* Bottom Navigation */}
         <div className="bg-zinc-50 rounded-3xl p-8 border border-zinc-200">

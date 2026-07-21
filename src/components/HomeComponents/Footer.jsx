@@ -28,9 +28,12 @@ export default function Footer() {
             </h4>
             <div className="flex flex-col gap-2.5">
               <Link to="/dashboard" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">Dashboard</Link>
+              <Link to="/analytics" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">Analytics</Link>
+              <Link to="/reports" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">Reports</Link>
               <Link to="/module/ficn-vision" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">FICN Vision Agent</Link>
               <Link to="/module/fraud-graph" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">Fraud Graph Intelligence</Link>
               <Link to="/module/citizen-shield" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">Citizen Fraud Shield</Link>
+              <Link to="/module/phishing-scanner" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">Phishing & SMS Scanner</Link>
             </div>
           </div>
 
@@ -64,9 +67,14 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="mt-12 pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-zinc-600">
-            © 2026 DRISHTI. National Digital Public Safety Platform.
-          </p>
+          <div className="flex flex-col">
+            <p className="text-xs font-bold text-zinc-300">
+              © 2026 DRISHTI AI. All rights reserved.
+            </p>
+            <p className="text-[10px] text-zinc-600 mt-0.5">
+              National Digital Public Safety & Predictive Risk Intelligence Platform.
+            </p>
+          </div>
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
             <span className="text-xs text-emerald-500/80 font-medium">All systems operational</span>
