@@ -9,9 +9,18 @@ import json
 import random
 
 from sse_starlette.sse import EventSourceResponse
+from fastapi import Depends
+import os
+import firebase_admin
+from firebase_admin import credentials
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from api.routes.phishing_scanner import router as phishing_router
 from api.routes.fraud_graph import router as fraud_graph_router, broadcast_graph_queues
 from api.routes.citizen_shield import router as citizen_shield_router
+from core.auth import get_current_user, get_current_user_sse, verify_internal_key
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("DRISHTI_HUB")
@@ -135,6 +144,17 @@ async def threat_spawner_loop():
 @asynccontextmanager
 async def lifespan(app):
     """Modern FastAPI lifespan: starts the simulation engine on boot."""
+    cred_path = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
+    if cred_path and not firebase_admin._apps:
+        try:
+            cred = credentials.Certificate(cred_path)
+            firebase_admin.initialize_app(cred)
+            logger.info("🔥 Firebase Admin initialized successfully.")
+        except Exception as e:
+            logger.error(f"Failed to initialize Firebase Admin: {e}")
+    else:
+        logger.warning("FIREBASE_SERVICE_ACCOUNT_JSON not set or already initialized.")
+        
     task = asyncio.create_task(threat_spawner_loop())
     logger.info("🚀 DRISHTI Command Center Hub — systems online")
     yield
@@ -285,7 +305,7 @@ broadcast_queues: list[asyncio.Queue] = []
 # ── EXISTING: FICN Alert Endpoint ──
 # -------------------------------------
 
-@app.post("/api/v1/alerts/trigger", status_code=201)
+@app.post("/api/v1/alerts/trigger", status_code=201, dependencies=[Depends(verify_internal_key)])
 async def receive_ficn_alert(request: Request):
     """
     Receives the AI payload from Port 8001 (Docker).
@@ -348,7 +368,7 @@ async def receive_ficn_alert(request: Request):
 
 # ── GET /api/v1/geospatial/nodes ──
 # Frontend calls this on page load to get all active threat nodes
-@app.get("/api/v1/geospatial/nodes")
+@app.get("/api/v1/geospatial/nodes", dependencies=[Depends(get_current_user)])
 def get_threat_nodes():
     conn = sqlite3.connect(DB_FILE, timeout=10)
     conn.row_factory = sqlite3.Row
@@ -363,7 +383,7 @@ def get_threat_nodes():
 # Called when commander clicks "Dispatch Action Plan".
 # After updating DB status, it broadcasts a 'node_neutralized' event
 # so ALL connected dashboards instantly remove the node from their map.
-@app.post("/api/v1/geospatial/dispatch")
+@app.post("/api/v1/geospatial/dispatch", dependencies=[Depends(get_current_user)])
 async def dispatch_action(request: Request):
     data = await request.json()
     node_id = data.get("node_id")
@@ -403,7 +423,7 @@ async def dispatch_action(request: Request):
 # Called by AI modules to register a NEW threat node on the map.
 # After saving to DB, it broadcasts the new node to all SSE listeners
 # so every connected dashboard sees the threat appear in real-time.
-@app.post("/api/v1/geospatial/nodes", status_code=201)
+@app.post("/api/v1/geospatial/nodes", status_code=201, dependencies=[Depends(verify_internal_key)])
 async def create_threat_node(request: Request):
     data = await request.json()
     
@@ -446,7 +466,7 @@ async def create_threat_node(request: Request):
 
 # ── GET /api/v1/geospatial/stream ──
 # SSE endpoint that streams 'new_threat' and 'node_neutralized' events.
-@app.get("/api/v1/geospatial/stream")
+@app.get("/api/v1/geospatial/stream", dependencies=[Depends(get_current_user_sse)])
 async def stream_nodes(request: Request):
     """SSE endpoint that streams both 'new_threat' and 'node_dispatched' events."""
     async def generator():

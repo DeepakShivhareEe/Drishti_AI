@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { fetchWithAuth } from '../utils/api'
 
 const URL_SAMPLES = [
   { label: 'Safe Link', value: 'https://www.onlinesbi.sbi/' },
@@ -34,7 +35,7 @@ export default function PhishingPage() {
       const endpoint = activeTab === 'url' ? '/api/phishing/scan-url' : '/api/phishing/scan-text'
       const payload = activeTab === 'url' ? { url: inputValue } : { text: inputValue }
 
-      const response = await fetch(`http://127.0.0.1:8000${endpoint}`, {
+      const response = await fetchWithAuth(`http://127.0.0.1:8000${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

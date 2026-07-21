@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-
+import { fetchWithAuth, createEventSourceWithAuth } from "../utils/api";
 const API_BASE = "http://localhost:8000/api/v1/fraud-graph";
 
 // ── Hardcoded demo data (fallback when backend is offline) ──
@@ -90,6 +90,7 @@ export default function useFraudGraph() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isLiveData, setIsLiveData] = useState(false);
+  const [connectionState, setConnectionState] = useState("DISCONNECTED");
   const [analysisResult, setAnalysisResult] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
@@ -100,8 +101,8 @@ export default function useFraudGraph() {
     const fetchData = async () => {
       try {
         const [networksRes, statsRes] = await Promise.all([
-          fetch(`${API_BASE}/networks`),
-          fetch(`${API_BASE}/stats`),
+          fetchWithAuth(`${API_BASE}/networks`),
+          fetchWithAuth(`${API_BASE}/stats`),
         ]);
 
         if (!networksRes.ok) throw new Error("Networks fetch failed");
@@ -138,8 +139,19 @@ export default function useFraudGraph() {
 
   // ── SSE listener for live graph updates (Upgrade #4) ──
   useEffect(() => {
-    const sse = new EventSource(`${API_BASE}/stream`);
-    sseRef.current = sse;
+    let sse;
+    let isMounted = true;
+    const connectSSE = async () => {
+      setConnectionState("CONNECTING");
+      try {
+        const stream = await createEventSourceWithAuth(`${API_BASE}/stream`);
+        if (!isMounted) {
+          stream.close();
+          return;
+        }
+        sse = stream;
+        sseRef.current = sse;
+        setConnectionState("CONNECTED");
 
     sse.addEventListener("new_fraud_node", (event) => {
       try {
@@ -167,11 +179,20 @@ export default function useFraudGraph() {
     });
 
     sse.onerror = () => {
-      // SSE connection lost — not critical
+      setConnectionState("ERROR");
+      setIsLiveData(false);
+      if (sse) sse.close();
     };
 
+    } catch (err) {
+      setConnectionState("ERROR");
+    }
+    };
+    connectSSE();
+
     return () => {
-      sse.close();
+      isMounted = false;
+      if (sse) sse.close();
       sseRef.current = null;
     };
   }, []);
@@ -200,7 +221,7 @@ export default function useFraudGraph() {
     async (networkId) => {
       setIsAnalyzing(true);
       try {
-        const res = await fetch(`${API_BASE}/analyze`, {
+        const res = await fetchWithAuth(`${API_BASE}/analyze`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ network_id: networkId || activeNetwork?.id }),
@@ -223,7 +244,7 @@ export default function useFraudGraph() {
   const downloadEvidence = useCallback(
     async (networkId) => {
       try {
-        const res = await fetch(
+        const res = await fetchWithAuth(
           `${API_BASE}/evidence/${networkId || activeNetwork?.id}`
         );
         if (!res.ok) throw new Error("Evidence generation failed");
@@ -255,6 +276,7 @@ export default function useFraudGraph() {
     isLoading,
     error,
     isLiveData,
+    connectionState,
     analysisResult,
     isAnalyzing,
     selectNetwork,

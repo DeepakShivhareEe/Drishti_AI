@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { fetchWithAuth } from "../utils/api";
 
 const API_BASE = "http://localhost:8000/api/v1/citizen-shield";
 
@@ -22,7 +23,7 @@ export default function useCitizenShield() {
   // ── Fetch stats ──
   const refreshStats = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/stats`);
+      const res = await fetchWithAuth(`${API_BASE}/stats`);
       if (res.ok) {
         const data = await res.json();
         setStats({
@@ -53,7 +54,7 @@ export default function useCitizenShield() {
       setIsAnalyzing(true);
 
       try {
-        const res = await fetch(`${API_BASE}/assess`, {
+        const res = await fetchWithAuth(`${API_BASE}/assess`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message, context_type: contextType }),
@@ -129,7 +130,7 @@ export default function useCitizenShield() {
   const generateReport = useCallback(async (assessmentId) => {
     if (!assessmentId) return;
     try {
-      const res = await fetch(`${API_BASE}/report`, {
+      const res = await fetchWithAuth(`${API_BASE}/report`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ assessment_id: assessmentId }),

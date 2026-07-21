@@ -5,9 +5,12 @@ import logging
 from io import BytesIO
 from PIL import Image
 from dotenv import load_dotenv
-from fastapi import FastAPI, UploadFile, File, HTTPException, status
+from fastapi import FastAPI, UploadFile, File, HTTPException, status, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 from google import genai
+import firebase_admin
+from firebase_admin import credentials, auth
 
 # Load environment variables
 load_dotenv()
@@ -16,10 +19,36 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("FICN_Agent")
 
+@asynccontextmanager
+async def lifespan(app):
+    cred_path = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
+    if cred_path and not firebase_admin._apps:
+        try:
+            cred = credentials.Certificate(cred_path)
+            firebase_admin.initialize_app(cred)
+            logger.info("🔥 Firebase Admin initialized successfully.")
+        except Exception as e:
+            logger.error(f"Failed to initialize Firebase Admin: {e}")
+    else:
+        logger.warning("FIREBASE_SERVICE_ACCOUNT_JSON not set or already initialized.")
+    yield
+
 app = FastAPI(
     title="DRISHTI - Agentic FICN Screening Core",
-    description="Multimodal LLM Forensic Currency Analysis"
+    description="Multimodal LLM Forensic Currency Analysis",
+    lifespan=lifespan
 )
+
+def get_current_user(authorization: str = Header(None)):
+    """Validates the Firebase ID token in the Authorization header."""
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid authentication token")
+    token = authorization.split("Bearer ")[1]
+    try:
+        decoded_token = auth.verify_id_token(token)
+        return decoded_token
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=f"Invalid token: {e}")
 
 # --- CORS BLOCK ---
 app.add_middleware(
@@ -43,7 +72,7 @@ MODEL_ID = "gemini-2.5-flash"
 HUB_ALERT_URL = "http://host.docker.internal:8000/api/v1/alerts/trigger"
 
 
-@app.post("/analyze/session", status_code=status.HTTP_200_OK)
+@app.post("/analyze/session", status_code=status.HTTP_200_OK, dependencies=[Depends(get_current_user)])
 async def process_screening_session(
     front_flat: UploadFile = File(...), 
     back_flat: UploadFile = File(...), 
@@ -134,7 +163,13 @@ async def process_screening_session(
         # 5. Dispatch Mechanism to the Main Hub (Port 8000) for Organized Ring Detection
         async with httpx.AsyncClient() as hub_client:
             try:
-                hub_response = await hub_client.post(HUB_ALERT_URL, json=screening_report, timeout=3.0)
+                internal_key = os.getenv("INTERNAL_API_KEY", "")
+                hub_response = await hub_client.post(
+                    HUB_ALERT_URL, 
+                    json=screening_report, 
+                    headers={"X-Internal-API-Key": internal_key},
+                    timeout=3.0
+                )
                 if hub_response.status_code == 201:
                     logger.info("Successfully synced alert with DRISHTI Command Center.")
             except (httpx.ConnectError, httpx.TimeoutException):

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import ForceGraph2D from "react-force-graph-2d";
 import { Link } from "react-router-dom";
+import { fetchWithAuth } from "../../utils/api";
 
 const API_BASE = "http://localhost:8000/api/v1/fraud-graph";
 
@@ -67,14 +68,15 @@ export default function FraudGraph() {
   const [graphData, setGraphData] = useState(DEMO_GRAPH);
   const [stats, setStats] = useState(DEMO_STATS);
   const [isLive, setIsLive] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const graphRef = useRef();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [networksRes, statsRes] = await Promise.all([
-          fetch(`${API_BASE}/networks`),
-          fetch(`${API_BASE}/stats`),
+          fetchWithAuth(`${API_BASE}/networks`),
+          fetchWithAuth(`${API_BASE}/stats`),
         ]);
 
         if (networksRes.ok) {
@@ -105,6 +107,8 @@ export default function FraudGraph() {
         }
       } catch {
         // Use demo data
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -158,7 +162,7 @@ export default function FraudGraph() {
         <div>
           <h2 className="text-lg font-bold text-white">Fraud Graph Intelligence</h2>
           <p className="text-xs text-zinc-400 font-medium">
-            {isLive ? "Live" : "Demo"} Preview • Highest-risk network
+            {isLoading ? "Fetching network data..." : `${isLive ? "Live" : "Demo"} Preview • Highest-risk network`}
           </p>
         </div>
         <div className="flex items-center gap-2 pointer-events-auto">
@@ -175,6 +179,28 @@ export default function FraudGraph() {
           </span>
         </div>
       </div>
+
+      {/* Loading Skeleton */}
+      {isLoading && (
+        <div className="absolute inset-0 z-20 bg-zinc-950 flex flex-col items-center justify-center">
+          <div className="w-full max-w-lg space-y-8 animate-pulse p-8">
+            <div className="flex justify-center">
+              <div className="w-24 h-24 rounded-full bg-zinc-800/80 border border-zinc-700/50 relative">
+                <div className="absolute top-1/2 -left-20 w-16 h-0.5 bg-zinc-800/80"></div>
+                <div className="absolute top-1/2 -right-20 w-16 h-0.5 bg-zinc-800/80"></div>
+                <div className="absolute -bottom-12 left-1/2 w-0.5 h-10 bg-zinc-800/80"></div>
+              </div>
+            </div>
+            <div className="flex justify-between px-10">
+              <div className="w-16 h-16 rounded-full bg-zinc-800/60 border border-zinc-700/50"></div>
+              <div className="w-20 h-20 rounded-full bg-zinc-800/60 border border-zinc-700/50"></div>
+            </div>
+            <div className="flex justify-center mt-10">
+              <div className="h-4 w-48 bg-zinc-800 rounded-full"></div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Stats Bar */}
       <div className="absolute bottom-0 left-0 w-full px-5 py-3 bg-gradient-to-t from-zinc-950/90 to-transparent z-10 flex items-center gap-6 text-[11px] text-zinc-500 font-medium pointer-events-none">

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Polyline } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { toast } from "react-hot-toast";
+import toast from "react-hot-toast";
+import { fetchWithAuth, createEventSourceWithAuth } from "../../utils/api";
 
 // ── Backend API base URL ──
 const API_BASE = "http://localhost:8000/api/v1/geospatial";
@@ -68,10 +69,11 @@ export default function GeospatialMap({ variant = "compact" }) {
   const [isDispatching, setIsDispatching] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isLiveData, setIsLiveData] = useState(false);
+  const [connectionState, setConnectionState] = useState("DISCONNECTED");
 
   // ── 1. Fetch live nodes from backend, fall back to demo nodes ──
   useEffect(() => {
-    fetch(`${API_BASE}/nodes`)
+    fetchWithAuth(`${API_BASE}/nodes`)
       .then(res => res.json())
       .then(data => {
         const mapped = data.map(transformNode);
@@ -80,13 +82,11 @@ export default function GeospatialMap({ variant = "compact" }) {
           setActiveNode(mapped[0]);
           setIsLiveData(true);
         } else {
-          // Backend returned empty → use demo nodes
           setNodes(DEMO_NODES);
           setActiveNode(DEMO_NODES[0]);
         }
       })
       .catch(() => {
-        // Backend unreachable → use demo nodes
         setNodes(DEMO_NODES);
         setActiveNode(DEMO_NODES[0]);
         toast("Using demo data — backend offline", { icon: "📡", duration: 3000 });
@@ -96,33 +96,57 @@ export default function GeospatialMap({ variant = "compact" }) {
 
   // ── 2. Real-time SSE listener for live updates ──
   useEffect(() => {
-    const sse = new EventSource(`${API_BASE}/stream`);
+    let sse;
+    let isMounted = true;
+    const connectSSE = async () => {
+      setConnectionState("CONNECTING");
+      try {
+        const stream = await createEventSourceWithAuth(`${API_BASE}/stream`);
+        if (!isMounted) {
+          stream.close();
+          return;
+        }
+        sse = stream;
+        setConnectionState("CONNECTED");
+        
+        // EVENT 1: A new threat node was spawned (by simulation engine or AI module)
+        sse.addEventListener("new_threat", (event) => {
+          const raw = JSON.parse(event.data);
+          const newNode = transformNode(raw);
+          setNodes(prev => [newNode, ...prev]);
+          setIsLiveData(true);
+          toast(
+            `🚨 Incoming: ${raw.category} at ${raw.city}`,
+            { icon: "📍", duration: 4000 }
+          );
+        });
 
-    // EVENT 1: A new threat node was spawned (by simulation engine or AI module)
-    sse.addEventListener("new_threat", (event) => {
-      const raw = JSON.parse(event.data);
-      const newNode = transformNode(raw);
-      setNodes(prev => [newNode, ...prev]);
-      setIsLiveData(true);
-      toast(
-        `🚨 Incoming: ${raw.category} at ${raw.city}`,
-        { icon: "📍", duration: 4000 }
-      );
-    });
+        // EVENT 2: A node was neutralized by a commander
+        sse.addEventListener("node_neutralized", (event) => {
+          const { node_id, city, category } = JSON.parse(event.data);
+          setNodes(prev => prev.filter(n => n.id !== node_id));
+          setActiveNode(prev => (prev?.id === node_id ? null : prev));
+          setIsDispatching(false);
+          toast.success(
+            `✅ ${category} at ${city} neutralized`,
+            { duration: 4000 }
+          );
+        });
 
-    // EVENT 2: A node was neutralized by a commander
-    sse.addEventListener("node_neutralized", (event) => {
-      const { node_id, city, category } = JSON.parse(event.data);
-      setNodes(prev => prev.filter(n => n.id !== node_id));
-      setActiveNode(prev => (prev?.id === node_id ? null : prev));
-      setIsDispatching(false);
-      toast.success(
-        `✅ ${category} at ${city} neutralized`,
-        { duration: 4000 }
-      );
-    });
-
-    return () => sse.close();
+        sse.onerror = (error) => {
+          setConnectionState("ERROR");
+          setIsLiveData(false);
+          if (sse) sse.close();
+        };
+      } catch (error) {
+        setConnectionState("ERROR");
+      }
+    };
+    connectSSE();
+    return () => { 
+      isMounted = false;
+      if (sse) sse.close(); 
+    };
   }, []);
 
   // ── 3. Dispatch Action Plan → calls real backend API ──
@@ -133,7 +157,7 @@ export default function GeospatialMap({ variant = "compact" }) {
     const targetCity = activeNode.city;
 
     try {
-      const res = await fetch(`${API_BASE}/dispatch`, {
+      const res = await fetchWithAuth(`${API_BASE}/dispatch`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ node_id: activeNode.id }),
@@ -159,12 +183,25 @@ export default function GeospatialMap({ variant = "compact" }) {
       {/* Map Header Overlay */}
       <div className="absolute top-0 left-0 w-full p-5 bg-gradient-to-b from-zinc-950/90 to-transparent z-[1000] flex justify-between items-start pointer-events-none">
         <div>
-          <h2 className="text-lg font-bold text-white">Geospatial Intelligence</h2>
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            Geospatial Intelligence
+            {connectionState === "CONNECTING" && <span className="flex h-2 w-2 relative"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span></span>}
+            {connectionState === "CONNECTED" && <span className="flex h-2 w-2 relative"><span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span></span>}
+            {connectionState === "ERROR" && <span className="flex h-2 w-2 relative"><span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span></span>}
+          </h2>
           <p className="text-xs text-zinc-400 font-medium">
-            {isLoading ? "Connecting to backend..." : `${isLiveData ? "Live" : "Demo"} Node Tracking • ${nodes.length} active`}
+            {connectionState === "CONNECTING" ? "Connecting to stream..." : `${isLiveData ? "Live" : "Demo"} Node Tracking • ${nodes.length} active`}
           </p>
         </div>
       </div>
+      
+      {/* Loading Skeleton */}
+      {isLoading && (
+        <div className="absolute inset-0 z-[2000] bg-zinc-950 flex flex-col items-center justify-center">
+          <div className="w-16 h-16 border-4 border-zinc-800 border-t-emerald-500 rounded-full animate-spin mb-4"></div>
+          <p className="text-emerald-500 font-bold tracking-widest uppercase animate-pulse">Initializing Map Engine...</p>
+        </div>
+      )}
       
       {/* Floating Info Panel for Active Node */}
       {activeNode && (

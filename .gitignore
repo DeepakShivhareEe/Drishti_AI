@@ -19,6 +19,8 @@ dist-ssr
 .env
 .env.*
 microservices/**/.env
+*serviceAccount*.json
+*firebase-adminsdk*.json
 
 # Python
 __pycache__/
