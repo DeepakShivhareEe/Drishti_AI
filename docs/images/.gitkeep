@@ -1,0 +1,10 @@
+This directory is intended for README screenshots.
+Filenames expected by README.md:
+- home.png
+- dashboard.png
+- geospatial-map.png
+- fraud-graph.png
+- ficn-workspace.png
+- module-detail.png
+- threat-feed.png
+- mobile.png

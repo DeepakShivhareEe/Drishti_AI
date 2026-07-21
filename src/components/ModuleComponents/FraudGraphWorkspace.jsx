@@ -128,10 +128,7 @@ export default function FraudGraphWorkspace() {
     return { nodes, links };
   }, [graphData]);
 
-  useEffect(() => {
-    window.debugGraphData = filteredGraphData;
-    console.log("Filtered graph data:", filteredGraphData);
-  }, [filteredGraphData]);
+
 
   // ── Auto-zoom to fit when data changes ──
   useEffect(() => {
@@ -188,22 +185,18 @@ export default function FraudGraphWorkspace() {
 
   // ── Custom node rendering on Canvas ──
   const paintNode = useCallback((node, ctx, globalScale) => {
-    if (!window.hasLoggedNodeCoords) {
-      console.log("PAINT NODE TICK 1:", { id: node.id, x: node.x, y: node.y, width: dimensions.width });
-      window.hasLoggedNodeCoords = true;
-    }
+
     if (!node || typeof node.x !== 'number' || typeof node.y !== 'number' || isNaN(node.x) || isNaN(node.y)) {
       if (!window.lastDebugLogFail || Date.now() - window.lastDebugLogFail > 2000) {
-        console.log("paintNode early return for node:", node?.id, "x:", node?.x, "y:", node?.y);
+        if (import.meta.env.DEV) {
+          console.error("paintNode early return for missing coords. Node:", node?.id, "x:", node?.x, "y:", node?.y);
+        }
         window.lastDebugLogFail = Date.now();
       }
       return;
     }
 
-    if (!window.lastDebugLog || Date.now() - window.lastDebugLog > 2000) {
-      console.log("paintNode rendering node:", node.id, "x:", node.x, "y:", node.y, "scale:", globalScale);
-      window.lastDebugLog = Date.now();
-    }
+
 
     try {
       const style = NODE_STYLES[node.nodeType] || NODE_STYLES.device;

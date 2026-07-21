@@ -274,7 +274,12 @@ drishti/
 │   │   ├── Home.jsx                  # Landing page (Hero + Stats + Modules)
 │   │   ├── Dashboard.jsx             # Command center with tabbed views
 │   │   ├── ModuleDetail.jsx          # Per-module documentation page
-│   │   └── ModuleWorkspace.jsx       # Live testing workspace router
+│   │   ├── ModuleWorkspace.jsx       # Live testing workspace router
+│   │   ├── AuthPage.jsx              # Login and authentication flow
+│   │   ├── Analytics.jsx             # Global metrics and analytics view
+│   │   ├── Reports.jsx               # Exportable reports generation
+│   │   ├── ClearanceProfile.jsx      # User profile and clearance details
+│   │   └── CommandSettings.jsx       # Application configuration panel
 │   │
 │   └── components/                   # Reusable UI components
 │       ├── HomeComponents/
@@ -319,6 +324,10 @@ drishti/
 | **Backend** | FastAPI | `latest` | Python REST API server |
 | **Build** | Vite | `8.1.0` | Dev server & bundler |
 | **Styling** | TailwindCSS | `4.3.1` | Utility-first CSS |
+| **Authentication** | Firebase / Google OAuth | `12.16.0` | User login and session management |
+| **Data Viz** | Recharts / React Force Graph | `latest` | Dashboard charts & graph visualization |
+| **Mapping** | Leaflet / React Leaflet | `5.0.0` | Geospatial threat intelligence map |
+| **Notifications**| React Hot Toast | `2.6.0` | In-app alerts and notifications |
 
 ### Libraries & Tools
 
@@ -769,7 +778,7 @@ docker run -p 8001:8001 \
 - [x] Analytics page
 - [x] Reports page
 - [ ] 🔲 Search functionality (search icon exists, no implementation)
-- [ ] 🔲 User authentication (profile menu exists, no auth flow)
+- [x] User authentication (Firebase Auth & Google OAuth implemented)
 
 - [x] Fraud Graph Intelligence workspace console
 - [x] Citizen Fraud Shield workspace console
@@ -785,7 +794,7 @@ docker run -p 8001:8001 \
 
 | Improvement | Description |
 |---|---|
-| **Authentication System** | Implement JWT-based auth with role-based access (Admin, Analyst, Operator) |
+| **Authentication System** | Extend Firebase auth with role-based access control (Admin, Analyst, Operator) |
 | **WebSocket Real-Time** | Replace `setInterval` mock with WebSocket for genuine live threat streaming |
 | **Database Integration** | Connect FastAPI to PostgreSQL/MongoDB for persistent data storage |
 | **Environment Variables** | Migrate hardcoded URLs to `import.meta.env` configuration |
@@ -1086,7 +1095,7 @@ SOFTWARE.
 ### Suggestions for Production Readiness
 
 1. **Add Environment Configuration** — Replace hardcoded URLs (`http://127.0.0.1:8001`) with `import.meta.env` variables
-2. **Implement Authentication** — JWT/OAuth2 flow for the profile menu and dashboard access
+2. **Extend Authentication** — Add role-based access control (RBAC) on top of existing Firebase Auth
 3. **Add React Error Boundaries** — Wrap route-level components with error boundaries
 4. **Enable Code Splitting** — Use `React.lazy()` and `Suspense` for dashboard and workspace routes
 5. **Set Up CI/CD** — GitHub Actions workflow for linting, testing, and deployment
