@@ -102,8 +102,8 @@ export default function Navbar() {
         { label: "Phishing & SMS Scanner", path: "/module/phishing-scanner" },
       ]
     },
-    { label: "Analytics", to: "#", enabled: false },
-    { label: "Reports", to: "#", enabled: false },
+    { label: "Analytics", to: "/analytics", enabled: true },
+    { label: "Reports", to: "/reports", enabled: true },
   ];
 
   return (

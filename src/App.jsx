@@ -11,6 +11,8 @@ import AuthPage from "./pages/AuthPage";
 import ClearanceProfile from "./pages/ClearanceProfile";
 import CommandSettings from "./pages/CommandSettings";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Analytics from "./pages/Analytics";
+import Reports from "./pages/Reports";
 
 // Dedicated Footer Pages
 import TrainingManuals from "./pages/TrainingManuals";
@@ -56,6 +58,8 @@ function AppContent() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<AuthPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+          <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
           
           {/* ── Footer Pages ───────────────────────────────── */}
           <Route path="/training" element={<TrainingManuals />} />
