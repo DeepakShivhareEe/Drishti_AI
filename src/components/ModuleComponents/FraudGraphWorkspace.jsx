@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState } from "react";
+import { useRef, useCallback, useState, useEffect, useMemo } from "react";
 import ForceGraph2D from "react-force-graph-2d";
 import useFraudGraph from "../../hooks/useFraudGraph";
 
@@ -30,7 +30,13 @@ function formatCurrency(amount) {
 
 export default function FraudGraphWorkspace() {
   const graphRef = useRef();
+  const containerRef = useRef();
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [hoveredNode, setHoveredNode] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [hiddenNodeTypes, setHiddenNodeTypes] = useState(new Set());
+  const [highlightNodes, setHighlightNodes] = useState(new Set());
+  const [highlightLinks, setHighlightLinks] = useState(new Set());
 
   const {
     networks,
@@ -49,111 +55,299 @@ export default function FraudGraphWorkspace() {
     downloadEvidence,
   } = useFraudGraph();
 
+  // Resize observer for the flex container
+  useEffect(() => {
+    if (!containerRef.current) return;
+    
+    const updateDimensions = () => {
+      const { clientWidth, clientHeight } = containerRef.current;
+      if (clientWidth > 0 && clientHeight > 0) {
+        setDimensions({ width: clientWidth, height: clientHeight });
+      }
+    };
+
+    // Initial measurement
+    updateDimensions();
+
+    const observer = new ResizeObserver(() => updateDimensions());
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // Compute node type counts for the legend
+  const nodeCounts = useMemo(() => {
+    const counts = {};
+    if (graphData?.nodes) {
+      graphData.nodes.forEach(n => {
+        counts[n.nodeType] = (counts[n.nodeType] || 0) + 1;
+      });
+    }
+    return counts;
+  }, [graphData]);
+
+  // Filter graph data based on hidden node types (and clone to prevent physics engine corruption)
+  const filteredGraphData = useMemo(() => {
+    if (!graphData || !graphData.nodes) return { nodes: [], links: [] };
+    
+    let nodes = graphData.nodes
+      .filter(n => !hiddenNodeTypes.has(n.nodeType))
+      .map(n => ({ ...n })); // Clone node
+      
+    const nodeIds = new Set(nodes.map(n => n.id));
+    
+    let links = graphData.links
+      .filter(l => {
+        const srcId = typeof l.source === 'object' ? l.source.id : l.source;
+        const tgtId = typeof l.target === 'object' ? l.target.id : l.target;
+        return nodeIds.has(srcId) && nodeIds.has(tgtId);
+      })
+      .map(l => ({
+        ...l,
+        source: typeof l.source === 'object' ? l.source.id : l.source,
+        target: typeof l.target === 'object' ? l.target.id : l.target
+      })); // Clone link and reset to primitive IDs
+
+    return { nodes, links };
+  }, [graphData, hiddenNodeTypes]);
+
+  // ForceGraph mutates objects in place, so we MUST give it a stable, cloned set of data
+  // and we coerce IDs to strings to prevent D3 force layout type mismatches.
+  const safeGraphData = useMemo(() => {
+    if (!graphData || !graphData.nodes) return { nodes: [], links: [] };
+    
+    // Deep clone nodes and ensure string IDs
+    const nodes = graphData.nodes.map(n => ({ ...n, id: String(n.id) }));
+    
+    // Deep clone links and ensure string IDs for source/target
+    const links = graphData.links.map(l => ({
+      ...l,
+      source: String(typeof l.source === 'object' ? l.source.id : l.source),
+      target: String(typeof l.target === 'object' ? l.target.id : l.target)
+    }));
+
+    return { nodes, links };
+  }, [graphData]);
+
+  useEffect(() => {
+    window.debugGraphData = filteredGraphData;
+    console.log("Filtered graph data:", filteredGraphData);
+  }, [filteredGraphData]);
+
+  // ── Auto-zoom to fit when data changes ──
+  useEffect(() => {
+    if (graphRef.current && safeGraphData.nodes.length > 0) {
+      // Safely wait for simulation to stabilize before zooming
+      const timer = setTimeout(() => {
+        if (graphRef.current && typeof graphRef.current.zoomToFit === 'function') {
+          try {
+            graphRef.current.zoomToFit(400, 50);
+          } catch (err) {
+            console.error("ZoomToFit failed:", err);
+          }
+        }
+      }, 1500); // Increased delay to ensure physics has settled
+      return () => clearTimeout(timer);
+    }
+  }, [safeGraphData]);
+
+  // Click-to-expand highlighting logic
+  useEffect(() => {
+    if (selectedNode) {
+      const newHighlightNodes = new Set([String(selectedNode.id)]);
+      const newHighlightLinks = new Set();
+      
+      safeGraphData.links.forEach(link => {
+        const srcId = String(typeof link.source === 'object' ? link.source.id : link.source);
+        const tgtId = String(typeof link.target === 'object' ? link.target.id : link.target);
+        const selId = String(selectedNode.id);
+        
+        if (srcId === selId || tgtId === selId) {
+          newHighlightLinks.add(link);
+          newHighlightNodes.add(srcId === selId ? tgtId : srcId);
+        }
+      });
+      
+      setHighlightNodes(newHighlightNodes);
+      setHighlightLinks(newHighlightLinks);
+    } else {
+      setHighlightNodes(new Set());
+      setHighlightLinks(new Set());
+    }
+  }, [selectedNode, safeGraphData]);
+
+
+  const toggleNodeType = (type) => {
+    const newSet = new Set(hiddenNodeTypes);
+    if (newSet.has(type)) {
+      newSet.delete(type);
+    } else {
+      newSet.add(type);
+    }
+    setHiddenNodeTypes(newSet);
+  };
+
   // ── Custom node rendering on Canvas ──
   const paintNode = useCallback((node, ctx, globalScale) => {
-    const style = NODE_STYLES[node.nodeType] || NODE_STYLES.device;
-    const size = Math.max(6, node.val * 1.5);
-    const isSelected = selectedNode?.id === node.id;
-    const isHovered = hoveredNode === node.id;
-    const fontSize = Math.max(10, 12 / globalScale);
+    if (!window.hasLoggedNodeCoords) {
+      console.log("PAINT NODE TICK 1:", { id: node.id, x: node.x, y: node.y, width: dimensions.width });
+      window.hasLoggedNodeCoords = true;
+    }
+    if (!node || typeof node.x !== 'number' || typeof node.y !== 'number' || isNaN(node.x) || isNaN(node.y)) {
+      if (!window.lastDebugLogFail || Date.now() - window.lastDebugLogFail > 2000) {
+        console.log("paintNode early return for node:", node?.id, "x:", node?.x, "y:", node?.y);
+        window.lastDebugLogFail = Date.now();
+      }
+      return;
+    }
 
-    // Glow effect
-    if (isSelected || isHovered) {
+    if (!window.lastDebugLog || Date.now() - window.lastDebugLog > 2000) {
+      console.log("paintNode rendering node:", node.id, "x:", node.x, "y:", node.y, "scale:", globalScale);
+      window.lastDebugLog = Date.now();
+    }
+
+    try {
+      const style = NODE_STYLES[node.nodeType] || NODE_STYLES.device;
+      const size = node.riskScore ? Math.max(6, node.riskScore / 6) : Math.max(6, (node.val || 1) * 1.5);
+      const isSelected = selectedNode && String(selectedNode.id) === String(node.id);
+      const isHovered = hoveredNode && String(hoveredNode) === String(node.id);
+      
+      const labelStr = node.label || "";
+      const matchesSearch = searchQuery && labelStr.toLowerCase().includes(searchQuery.toLowerCase());
+      const isHighlighted = (highlightNodes.size === 0 || highlightNodes.has(node.id)) && (!searchQuery || matchesSearch);
+
+      // Dim nodes if not highlighted
+      ctx.globalAlpha = isHighlighted ? 1 : 0.2;
+
+      // Make font size fixed in canvas units, relative to node size so it scales naturally with zoom
+      const fontSize = 4.5;
+
+      // High risk pulsing ring
+      if (node.riskScore >= 90) {
+        const pulseRadius = size + 2 + Math.abs(Math.sin(Date.now() / 300)) * 4;
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, pulseRadius, 0, 2 * Math.PI);
+        ctx.fillStyle = "rgba(239, 68, 68, 0.3)"; // Red pulse
+        ctx.fill();
+      }
+
+      // Glow effect
+      if (isSelected || isHovered) {
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, size + 4, 0, 2 * Math.PI);
+        ctx.fillStyle = style.color + "30";
+        ctx.fill();
+      }
+
+      // Outer ring
       ctx.beginPath();
-      ctx.arc(node.x, node.y, size + 6, 0, 2 * Math.PI);
-      ctx.fillStyle = style.color + "30";
+      ctx.arc(node.x, node.y, size + 1.5, 0, 2 * Math.PI);
+      ctx.fillStyle = isSelected ? "#ffffff" : style.color + "60";
       ctx.fill();
+
+      // Main circle
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, size, 0, 2 * Math.PI);
+      ctx.fillStyle = node.nodeType === "victim" ? "#18181b" : style.color;
+      ctx.fill();
+      if (node.nodeType === "victim") {
+        ctx.strokeStyle = style.color;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      // Inner icon (emoji)
+      if (style.emoji) {
+        ctx.font = `${size * 0.8}px serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = node.nodeType === "victim" ? style.color : "#000000";
+        ctx.fillText(style.emoji, node.x, node.y);
+      }
+
+      // Label below (only show if zoomed in, or explicitly hovered/searched to reduce clutter)
+      if (globalScale > 1.2 || isSelected || isHovered || matchesSearch) {
+        ctx.font = `${isSelected || matchesSearch ? "bold " : ""}${fontSize}px Inter, system-ui, sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+
+        // Label background
+        const labelText = labelStr.length > 20 ? labelStr.slice(0, 18) + "…" : labelStr;
+        const textWidth = ctx.measureText(labelText).width;
+        const padding = 2;
+        ctx.fillStyle = "rgba(0,0,0,0.75)";
+        ctx.fillRect(
+          node.x - textWidth / 2 - padding,
+          node.y + size + 3,
+          textWidth + padding * 2,
+          fontSize + padding * 1.5
+        );
+
+        ctx.fillStyle = isSelected || matchesSearch ? "#ffffff" : "#d4d4d8";
+        ctx.fillText(labelText, node.x, node.y + size + 4);
+      }
+    } catch (e) {
+      console.error("paintNode error", e);
+    } finally {
+      ctx.globalAlpha = 1; // reset
     }
-
-    // Outer ring
-    ctx.beginPath();
-    ctx.arc(node.x, node.y, size + 2, 0, 2 * Math.PI);
-    ctx.fillStyle = isSelected ? "#ffffff" : style.color + "60";
-    ctx.fill();
-
-    // Main circle
-    ctx.beginPath();
-    ctx.arc(node.x, node.y, size, 0, 2 * Math.PI);
-    ctx.fillStyle = node.nodeType === "victim" ? "#18181b" : style.color;
-    ctx.fill();
-    if (node.nodeType === "victim") {
-      ctx.strokeStyle = style.color;
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    }
-
-    // Inner icon (emoji)
-    ctx.font = `${size * 0.9}px serif`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(style.emoji, node.x, node.y);
-
-    // Label below
-    if (globalScale > 0.6 || isSelected || isHovered) {
-      ctx.font = `${isSelected ? "bold " : ""}${fontSize}px Inter, system-ui, sans-serif`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "top";
-
-      // Label background
-      const labelText = node.label.length > 20 ? node.label.slice(0, 18) + "…" : node.label;
-      const textWidth = ctx.measureText(labelText).width;
-      const padding = 4;
-      ctx.fillStyle = "rgba(0,0,0,0.75)";
-      ctx.fillRect(
-        node.x - textWidth / 2 - padding,
-        node.y + size + 4,
-        textWidth + padding * 2,
-        fontSize + padding
-      );
-
-      ctx.fillStyle = isSelected ? "#ffffff" : "#d4d4d8";
-      ctx.fillText(labelText, node.x, node.y + size + 6);
-    }
-  }, [selectedNode, hoveredNode]);
+  }, [selectedNode, hoveredNode, highlightNodes, searchQuery]);
 
   // ── Custom link rendering ──
   const paintLink = useCallback((link, ctx) => {
-    const color = EDGE_COLORS[link.edgeType] || "#52525b";
-    const width = Math.max(0.5, Math.min(link.weight * 0.4, 3));
+    if (!link.source || typeof link.source !== 'object' || typeof link.source.x !== 'number') return;
+    if (!link.target || typeof link.target !== 'object' || typeof link.target.x !== 'number') return;
 
-    ctx.beginPath();
-    ctx.moveTo(link.source.x, link.source.y);
-    ctx.lineTo(link.target.x, link.target.y);
+    try {
+      const isHighlighted = highlightLinks.size === 0 || highlightLinks.has(link);
+      ctx.globalAlpha = isHighlighted ? 1 : 0.15;
 
-    if (link.edgeType === "call" || link.edgeType === "device_link") {
-      ctx.setLineDash([4, 4]);
-    } else {
+      const color = EDGE_COLORS[link.edgeType] || "#52525b";
+      const width = Math.max(0.5, Math.min((link.weight || 1) * 0.4, 3));
+
+      ctx.beginPath();
+      ctx.moveTo(link.source.x, link.source.y);
+      ctx.lineTo(link.target.x, link.target.y);
+
+      if (link.edgeType === "call" || link.edgeType === "device_link") {
+        ctx.setLineDash([4, 4]);
+        ctx.lineDashOffset = -Date.now() / 50; 
+      } else {
+        ctx.setLineDash([]);
+      }
+
+      ctx.strokeStyle = color + "80";
+      ctx.lineWidth = width;
+      ctx.stroke();
       ctx.setLineDash([]);
+
+      // Arrow
+      const dx = link.target.x - link.source.x;
+      const dy = link.target.y - link.source.y;
+      const angle = Math.atan2(dy, dx);
+      const arrowLen = 6;
+      const midX = (link.source.x + link.target.x) / 2;
+      const midY = (link.source.y + link.target.y) / 2;
+
+      ctx.beginPath();
+      ctx.moveTo(midX, midY);
+      ctx.lineTo(
+        midX - arrowLen * Math.cos(angle - Math.PI / 6),
+        midY - arrowLen * Math.sin(angle - Math.PI / 6)
+      );
+      ctx.moveTo(midX, midY);
+      ctx.lineTo(
+        midX - arrowLen * Math.cos(angle + Math.PI / 6),
+        midY - arrowLen * Math.sin(angle + Math.PI / 6)
+      );
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    } catch (e) {
+      console.error("paintLink error", e);
+    } finally {
+      ctx.globalAlpha = 1; // reset
     }
-
-    ctx.strokeStyle = color + "80";
-    ctx.lineWidth = width;
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Arrow
-    const dx = link.target.x - link.source.x;
-    const dy = link.target.y - link.source.y;
-    const angle = Math.atan2(dy, dx);
-    const arrowLen = 6;
-    const midX = (link.source.x + link.target.x) / 2;
-    const midY = (link.source.y + link.target.y) / 2;
-
-    ctx.beginPath();
-    ctx.moveTo(midX, midY);
-    ctx.lineTo(
-      midX - arrowLen * Math.cos(angle - Math.PI / 6),
-      midY - arrowLen * Math.sin(angle - Math.PI / 6)
-    );
-    ctx.moveTo(midX, midY);
-    ctx.lineTo(
-      midX - arrowLen * Math.cos(angle + Math.PI / 6),
-      midY - arrowLen * Math.sin(angle + Math.PI / 6)
-    );
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-  }, []);
+  }, [highlightLinks]);
 
   if (isLoading) {
     return (
@@ -170,7 +364,7 @@ export default function FraudGraphWorkspace() {
   }
 
   return (
-    <div className="w-full bg-zinc-950 rounded-2xl border border-zinc-800 shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex flex-col w-screen h-screen bg-zinc-950 overflow-hidden m-0 p-0">
 
       {/* ── TOP TOOLBAR ── */}
       <div className="flex items-center justify-between px-5 py-3 bg-zinc-900/80 border-b border-zinc-800">
@@ -191,9 +385,9 @@ export default function FraudGraphWorkspace() {
           <button
             onClick={() => analyzeNetwork()}
             disabled={isAnalyzing}
-            className="px-3 py-1.5 bg-violet-500/20 hover:bg-violet-500/30 text-violet-400 text-xs font-bold rounded-lg border border-violet-500/30 transition-colors disabled:opacity-50 cursor-pointer"
+            className="px-4 py-1.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white text-xs font-bold rounded-lg border border-violet-400/50 transition-all disabled:opacity-50 cursor-pointer shadow-[0_0_15px_rgba(139,92,246,0.4)]"
           >
-            {isAnalyzing ? "Analyzing..." : "🧠 AI Analysis"}
+            {isAnalyzing ? "Analyzing..." : "✨ AI Analysis"}
           </button>
           <button
             onClick={() => downloadEvidence()}
@@ -211,7 +405,7 @@ export default function FraudGraphWorkspace() {
         </div>
       </div>
 
-      <div className="flex" style={{ height: "700px" }}>
+      <div className="flex flex-1 overflow-hidden w-full">
 
         {/* ── LEFT SIDEBAR — Network Selector ── */}
         <div className="w-[240px] bg-zinc-900/50 border-r border-zinc-800 overflow-y-auto shrink-0">
@@ -253,37 +447,103 @@ export default function FraudGraphWorkspace() {
                   <span>•</span>
                   <span>{formatCurrency(net.total_amount_inr)}</span>
                 </div>
+                {net.risk_score >= 90 && (
+                  <div className="mt-2 text-[9px] text-zinc-500 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]"></span>
+                    Updated just now
+                  </div>
+                )}
               </button>
             ))}
           </div>
 
           {/* Legend */}
           <div className="p-3 border-t border-zinc-800 mt-2">
-            <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-2">Legend</p>
-            <div className="space-y-1.5">
-              {Object.entries(NODE_STYLES).map(([key, style]) => (
-                <div key={key} className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: style.color }} />
-                  <span className="text-zinc-400 text-[10px]">{style.emoji} {style.label}</span>
-                </div>
-              ))}
+            <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-2 flex items-center justify-between">
+              Legend
+              <span className="text-[9px] text-zinc-600 font-normal normal-case">Click to filter</span>
+            </p>
+            <div className="space-y-1">
+              {Object.entries(NODE_STYLES).map(([key, style]) => {
+                const count = nodeCounts[key] || 0;
+                const isHidden = hiddenNodeTypes.has(key);
+                return (
+                  <button 
+                    key={key} 
+                    onClick={() => toggleNodeType(key)}
+                    className={`w-full flex items-center justify-between p-1.5 rounded-lg hover:bg-zinc-800/60 transition-colors cursor-pointer ${isHidden ? 'opacity-40 grayscale' : 'opacity-100'}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: style.color }} />
+                      <span className="text-zinc-300 text-[11px] font-medium">{style.emoji} {style.label}</span>
+                    </div>
+                    <span className="text-zinc-500 text-[10px] font-mono bg-zinc-800/80 px-1.5 py-0.5 rounded">{count}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
 
         {/* ── CENTER — Force Graph Canvas ── */}
-        <div className="flex-1 relative">
+        <div className="flex-1 w-full h-full relative bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-950/20 via-zinc-950 to-zinc-950 overflow-hidden" ref={containerRef}>
+          {/* Subtle grid background */}
+          <div className="absolute inset-0 pointer-events-none opacity-40" style={{
+            backgroundImage: "linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)",
+            backgroundSize: "40px 40px"
+          }} />
+
+          {/* Top Search Bar */}
+          <div className="absolute top-4 left-4 z-10 flex gap-2">
+            <div className="relative">
+              <input 
+                type="text" 
+                placeholder="Search nodes by name..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-zinc-900/90 border border-zinc-700 text-zinc-300 text-[11px] rounded-lg pl-8 pr-3 py-2 focus:outline-none focus:border-violet-500 w-56 shadow-lg backdrop-blur-sm"
+              />
+              <svg className="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            </div>
+          </div>
+
+          {/* Zoom Controls */}
+          <div className="absolute bottom-4 right-4 z-10 flex flex-col gap-1.5 bg-zinc-900/80 p-1.5 rounded-lg border border-zinc-700 shadow-lg backdrop-blur-sm">
+            <button onClick={() => graphRef.current?.zoom(graphRef.current.zoom() * 1.5, 400)} className="w-7 h-7 flex items-center justify-center rounded hover:bg-zinc-700 text-zinc-300 cursor-pointer" title="Zoom In">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+            </button>
+            <button onClick={() => graphRef.current?.zoom(graphRef.current.zoom() / 1.5, 400)} className="w-7 h-7 flex items-center justify-center rounded hover:bg-zinc-700 text-zinc-300 cursor-pointer" title="Zoom Out">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" /></svg>
+            </button>
+            <button onClick={() => graphRef.current?.zoomToFit(400)} className="w-7 h-7 flex items-center justify-center rounded hover:bg-zinc-700 text-zinc-300 cursor-pointer" title="Fit to Screen">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+            </button>
+          </div>
+
           {error && (
-            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 px-3 py-1.5 bg-amber-500/20 border border-amber-500/30 rounded-lg text-amber-400 text-xs font-medium">
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 px-3 py-1.5 bg-amber-500/20 border border-amber-500/30 rounded-lg text-amber-400 text-xs font-medium">
               {error}
             </div>
           )}
+
           <ForceGraph2D
             ref={graphRef}
-            graphData={graphData}
+            width={dimensions.width || 800}
+            height={dimensions.height || 600}
+            graphData={safeGraphData}
             nodeCanvasObject={paintNode}
             linkCanvasObject={paintLink}
             nodeRelSize={6}
+            nodeLabel={(node) => `
+              <div style="background: #18181b; border: 1px solid #3f3f46; padding: 8px; border-radius: 6px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5); font-family: Inter, system-ui, sans-serif; font-size: 12px; color: #d4d4d8;">
+                <div style="font-weight: 600; color: #ffffff; margin-bottom: 2px;">${node.label}</div>
+                <div style="color: #a1a1aa; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">${node.nodeType}</div>
+                <div style="display: flex; gap: 12px; font-size: 11px;">
+                  <div>Risk: <span style="color: ${node.riskScore > 80 ? '#ef4444' : '#eab308'}; font-weight: 600;">${node.riskScore || 'N/A'}</span></div>
+                  <div>Role: <span style="color: #ffffff;">${node.metadata?.role || node.metadata?.method || 'Unknown'}</span></div>
+                </div>
+              </div>
+            `}
             linkDirectionalParticles={(link) =>
               link.edgeType === "transaction" || link.edgeType === "fund_relay" ? 3 : 0
             }
@@ -292,7 +552,7 @@ export default function FraudGraphWorkspace() {
             linkDirectionalParticleSpeed={0.005}
             onNodeClick={(node) => selectNode(node)}
             onNodeHover={(node) => setHoveredNode(node?.id || null)}
-            backgroundColor="#09090b"
+            backgroundColor="rgba(0,0,0,0)"
             cooldownTicks={80}
             d3AlphaDecay={0.02}
             d3VelocityDecay={0.3}
@@ -431,24 +691,24 @@ export default function FraudGraphWorkspace() {
       </div>
 
       {/* ── BOTTOM STATS BAR ── */}
-      <div className="flex items-center justify-between px-5 py-2.5 bg-zinc-900/80 border-t border-zinc-800">
-        <div className="flex items-center gap-5 text-[11px] text-zinc-500 font-medium">
-          <span>Nodes: <span className="text-zinc-300 font-mono">{graphData.nodes.length}</span></span>
-          <span>Edges: <span className="text-zinc-300 font-mono">{graphData.links.length}</span></span>
+      <div className="flex flex-wrap items-center justify-between px-5 py-3 bg-zinc-900/90 border-t border-zinc-800 gap-y-2 gap-x-4">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-[11px] text-zinc-500 font-medium">
+          <span className="flex items-center gap-1.5">Nodes: <span className="text-zinc-300 font-mono bg-zinc-800 px-1.5 py-0.5 rounded">{graphData.nodes.length}</span></span>
+          <span className="flex items-center gap-1.5">Edges: <span className="text-zinc-300 font-mono bg-zinc-800 px-1.5 py-0.5 rounded">{graphData.links.length}</span></span>
           {activeNetwork && (
             <>
-              <span>Risk: <span className={`font-mono ${
+              <span className="flex items-center gap-1.5">Risk: <span className={`font-mono px-1.5 py-0.5 rounded bg-zinc-800 ${
                 activeNetwork.risk_score >= 80 ? "text-red-400" : "text-orange-400"
               }`}>{activeNetwork.risk_score}</span></span>
-              <span>Amount: <span className="text-emerald-400 font-mono">{formatCurrency(activeNetwork.total_amount_inr)}</span></span>
+              <span className="flex items-center gap-1.5">Amount: <span className="text-emerald-400 font-mono bg-zinc-800 px-1.5 py-0.5 rounded">{formatCurrency(activeNetwork.total_amount_inr)}</span></span>
             </>
           )}
         </div>
         {stats && (
-          <div className="flex items-center gap-4 text-[11px] text-zinc-600">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-zinc-600">
             <span>Total Networks: {stats.total_networks}</span>
-            <span>Critical: <span className="text-red-400">{stats.critical_networks}</span></span>
-            <span>Total Fraud: <span className="text-amber-400">{formatCurrency(stats.total_fraud_amount_inr)}</span></span>
+            <span>Critical: <span className="text-red-400 font-medium">{stats.critical_networks}</span></span>
+            <span>Total Fraud: <span className="text-amber-400 font-medium">{formatCurrency(stats.total_fraud_amount_inr)}</span></span>
           </div>
         )}
       </div>

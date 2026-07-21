@@ -519,11 +519,14 @@ def _seed_fraud_networks(cursor):
         (net1_id, "crypto", "Crypto Exchange (WazirX)", _json.dumps({"platform": "WazirX", "wallet": "0x7f3a...b2c1", "total_converted": 1450000}), 19.0760, 72.8777, "Mumbai, MH", 85),
         (net1_id, "device", "Device #4A2F", _json.dumps({"type": "Android", "imei": "35678901234", "model": "Redmi Note 12"}), 28.6139, 77.2090, "New Delhi, DL", 45),
     ]
-    cursor.executemany("""
-        INSERT INTO fraud_nodes (network_id, node_type, label, metadata_json, latitude, longitude, city, risk_score)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, net1_nodes)
-    n1_start = cursor.lastrowid - len(net1_nodes) + 1
+    n1_ids = []
+    for node in net1_nodes:
+        cursor.execute("""
+            INSERT INTO fraud_nodes (network_id, node_type, label, metadata_json, latitude, longitude, city, risk_score)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, node)
+        n1_ids.append(cursor.lastrowid)
+    n1_start = n1_ids[0]
 
     # Edges for Network 1 (node IDs are n1_start + offset)
     net1_edges = [
@@ -571,11 +574,14 @@ def _seed_fraud_networks(cursor):
         (net2_id, "scammer", "Hawala Tunnel Exit", _json.dumps({"destination": "Nepal/Bangladesh", "weekly_volume": 800000}), 26.4499, 80.3319, "Kanpur, UP", 88),
         (net2_id, "device", "Courier Phone #1", _json.dumps({"type": "Feature phone", "numbers": ["+91-70XXX12345", "+91-70XXX12346"]}), 21.1702, 72.8311, "Surat, GJ", 40),
     ]
-    cursor.executemany("""
-        INSERT INTO fraud_nodes (network_id, node_type, label, metadata_json, latitude, longitude, city, risk_score)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, net2_nodes)
-    n2_start = cursor.lastrowid - len(net2_nodes) + 1
+    n2_ids = []
+    for node in net2_nodes:
+        cursor.execute("""
+            INSERT INTO fraud_nodes (network_id, node_type, label, metadata_json, latitude, longitude, city, risk_score)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, node)
+        n2_ids.append(cursor.lastrowid)
+    n2_start = n2_ids[0]
 
     net2_edges = [
         (net2_id, n2_start+0, n2_start+1, "account_link", 4.0, _json.dumps({"method": "Courier dispatch", "frequency": "Weekly"})),
@@ -618,11 +624,14 @@ def _seed_fraud_networks(cursor):
         (net3_id, "mule", "Cash-Out Mule", _json.dumps({"method": "ATM Withdrawal", "daily_limit_used": True, "withdrawals": 34}), 26.9124, 75.7873, "Jaipur, RJ", 70),
         (net3_id, "device", "Shared Burner Phone", _json.dumps({"type": "Samsung J2", "sim_count": 6, "imei": "86754321098"}), 21.1702, 72.8311, "Surat, GJ", 50),
     ]
-    cursor.executemany("""
-        INSERT INTO fraud_nodes (network_id, node_type, label, metadata_json, latitude, longitude, city, risk_score)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, net3_nodes)
-    n3_start = cursor.lastrowid - len(net3_nodes) + 1
+    n3_ids = []
+    for node in net3_nodes:
+        cursor.execute("""
+            INSERT INTO fraud_nodes (network_id, node_type, label, metadata_json, latitude, longitude, city, risk_score)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, node)
+        n3_ids.append(cursor.lastrowid)
+    n3_start = n3_ids[0]
 
     net3_edges = [
         (net3_id, n3_start+0, n3_start+1, "call", 3.0, _json.dumps({"credentials_shared": 23, "method": "Fake KYC call"})),

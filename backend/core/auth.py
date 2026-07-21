@@ -8,6 +8,10 @@ logger = logging.getLogger(__name__)
 
 def get_current_user(authorization: str = Header(None)):
     """Validates the Firebase ID token in the Authorization header."""
+    if not firebase_admin._apps:
+        # Bypass for local dev when Firebase Admin is not initialized
+        return {"uid": "dev-user", "email": "dev@drishti.local"}
+
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Missing or invalid authentication token")
     token = authorization.split("Bearer ")[1]
@@ -21,6 +25,10 @@ def get_current_user(authorization: str = Header(None)):
 
 def get_current_user_sse(token: str = Query(None)):
     """Validates the Firebase ID token from the URL query parameter for SSE streams."""
+    if not firebase_admin._apps:
+        # Bypass for local dev when Firebase Admin is not initialized
+        return {"uid": "dev-user", "email": "dev@drishti.local"}
+
     if not token:
         raise HTTPException(status_code=401, detail="Missing authentication token")
     
