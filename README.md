@@ -373,12 +373,17 @@ The backend API will be available at `http://localhost:8000`.
 ### 4. ML Engine (FICN Vision)
 
 > [!IMPORTANT]
-> The FICN Vision ML engine runs on a separate service (Port 8001). Ensure the engine is running before using the FICN Vision workspace.
+> The FICN Vision ML engine runs on a separate service (Port 8001). We strongly recommend running it via Docker to handle system-level computer vision dependencies (like OpenCV and libgl1).
 
 ```bash
-# Navigate to your ML engine directory (separate repository)
-# Start the ML inference server
-uvicorn ficn_engine:app --reload --port 8001
+# Navigate to the FICN Vision microservice directory
+cd microservices/ficn-vision
+
+# Build the Docker image
+docker build -t ficn-vision-engine .
+
+# Run the Docker container on port 8001
+docker run -p 8001:8001 ficn-vision-engine
 ```
 
 ### 5. Production Build
@@ -704,62 +709,30 @@ npm run build    # Outputs to dist/
 npm run preview  # Preview production build
 ```
 
-### Docker *(Recommended Future Enhancement)*
+### Docker
 
-> [!NOTE]
-> Docker configuration does not currently exist. Below is a recommended structure.
+The FICN Vision ML Engine is containerized using Docker to properly manage system-level dependencies for computer vision (e.g., OpenCV, `libgl1`).
 
-<details>
-<summary>📝 Recommended <code>Dockerfile</code></summary>
+#### Building and Running the FICN Vision Engine
 
-```dockerfile
-# Frontend
-FROM node:20-alpine AS frontend
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
-
-# Backend
-FROM python:3.12-slim AS backend
-WORKDIR /app
-COPY backend/ .
-RUN pip install fastapi uvicorn
-EXPOSE 8000
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+1. Navigate to the microservice directory:
+```bash
+cd microservices/ficn-vision
 ```
 
-</details>
-
-<details>
-<summary>📝 Recommended <code>docker-compose.yml</code></summary>
-
-```yaml
-version: "3.9"
-services:
-  frontend:
-    build:
-      context: .
-      target: frontend
-    ports:
-      - "5173:5173"
-  
-  backend:
-    build:
-      context: .
-      target: backend
-    ports:
-      - "8000:8000"
-    
-  ml-engine:
-    build:
-      context: ./ml-engine
-    ports:
-      - "8001:8001"
+2. Build the Docker image:
+```bash
+docker build -t ficn-vision-engine .
 ```
 
-</details>
+3. Run the container:
+```bash
+docker run -p 8001:8001 \
+  -e GOOGLE_API_KEY=your_gemini_api_key_here \
+  ficn-vision-engine
+```
+
+> **Note:** The backend and frontend are not currently containerized and should be run using `npm run dev` and `uvicorn` respectively as described above.
 
 ---
 
