@@ -78,7 +78,7 @@ export default function CitizenShieldWorkspace() {
   };
 
   return (
-    <div className="fixed top-[64px] left-0 right-0 bottom-0 z-40 flex flex-col bg-slate-50 font-sans text-slate-900 overflow-hidden">
+    <div className="fixed top-0 left-0 right-0 bottom-0 z-40 flex flex-col bg-slate-50 font-sans text-slate-900 overflow-hidden">
       
       {/* ── HEADER ── */}
       <div className="sticky top-0 z-20 flex items-center justify-between px-6 py-4 bg-white/80 backdrop-blur-md border-b border-slate-200/60 shadow-sm w-full shrink-0">

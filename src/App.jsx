@@ -39,7 +39,7 @@ const NAVBAR_HIDDEN_ROUTES = ["/login"];
 function AppContent() {
   const location = useLocation();
   const showFooter = !FOOTER_HIDDEN_ROUTES.includes(location.pathname) && !location.pathname.startsWith('/workspace');
-  const showNavbar = !NAVBAR_HIDDEN_ROUTES.includes(location.pathname);
+  const showNavbar = !NAVBAR_HIDDEN_ROUTES.includes(location.pathname) && !location.pathname.startsWith('/workspace');
   const isLoginPage = location.pathname === "/login";
 
   return (
