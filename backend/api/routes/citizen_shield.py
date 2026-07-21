@@ -8,7 +8,7 @@ Upgrade #2: All endpoints are async def. AI calls use asyncio.to_thread().
 Upgrade #3: All response_json columns use json.loads()/json.dumps().
 """
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Depends
 from pydantic import BaseModel
 import sqlite3
 import json
@@ -16,6 +16,7 @@ import datetime
 import logging
 
 from core.citizen_shield_engine import assess_fraud_risk, is_ai_available
+from core.auth import get_current_user
 
 logger = logging.getLogger("CITIZEN_SHIELD_API")
 
@@ -37,7 +38,7 @@ class ReportRequest(BaseModel):
 # ── POST /assess — Main fraud risk assessment
 # ──────────────────────────────────────────────
 
-@router.post("/assess")
+@router.post("/assess", dependencies=[Depends(get_current_user)])
 async def assess(req: AssessRequest):
     """
     Async endpoint that runs fraud analysis without blocking the event loop.
@@ -87,7 +88,7 @@ async def assess(req: AssessRequest):
 # ── GET /recent — Recent assessments
 # ──────────────────────────────────────────────
 
-@router.get("/recent")
+@router.get("/recent", dependencies=[Depends(get_current_user)])
 async def get_recent(limit: int = 20):
     """Returns recent assessments with parsed JSON responses."""
     conn = sqlite3.connect(DB_FILE, timeout=10)
@@ -117,7 +118,7 @@ async def get_recent(limit: int = 20):
 # ── POST /report — Generate NCRB complaint
 # ──────────────────────────────────────────────
 
-@router.post("/report")
+@router.post("/report", dependencies=[Depends(get_current_user)])
 async def generate_report(req: ReportRequest):
     """Generate a pre-filled NCRB complaint template from an assessment."""
     conn = sqlite3.connect(DB_FILE, timeout=10)
@@ -189,7 +190,7 @@ def _map_fraud_to_ncrb(fraud_type: str) -> str:
 # ── GET /stats — Shield statistics
 # ──────────────────────────────────────────────
 
-@router.get("/stats")
+@router.get("/stats", dependencies=[Depends(get_current_user)])
 async def get_stats():
     conn = sqlite3.connect(DB_FILE, timeout=10)
     cursor = conn.cursor()

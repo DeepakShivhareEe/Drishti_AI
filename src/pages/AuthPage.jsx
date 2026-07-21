@@ -6,7 +6,6 @@ import { auth, googleProvider } from "../firebase";
 import logo from "../assets/logo.png"; // Ensure this path matches where your logo is!
 
 export default function AuthPage() {
-  const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -16,7 +15,7 @@ export default function AuthPage() {
     getRedirectResult(auth)
       .then((result) => {
         if (result?.user) {
-          navigate(-1);
+          navigate('/dashboard');
         }
       })
       .catch((err) => {
@@ -31,7 +30,7 @@ export default function AuthPage() {
     try {
       // Try popup first
       await signInWithPopup(auth, googleProvider);
-      navigate(-1);
+      navigate('/dashboard');
     } catch (err) {
       // If popup is blocked, fall back to redirect
       if (err.code === "auth/popup-blocked") {
@@ -113,12 +112,12 @@ export default function AuthPage() {
           </div>
 
           <div className="mb-2 text-center">
-            <h2 className="text-3xl font-extrabold text-zinc-900 tracking-tight mb-10">
-              {isSignUp ? "Create clearance profile" : "Welcome to DRISHTI"}
-              <p className="text-sm mb-7 font-semibold text-zinc-400">
-                Digital Risk Intelligence & Safety Hub
-              </p>
+            <h2 className="text-3xl font-extrabold text-zinc-900 tracking-tight mb-2">
+              Welcome to DRISHTI
             </h2>
+            <p className="text-sm mb-7 font-semibold text-zinc-400">
+              Digital Risk Intelligence & Safety Hub
+            </p>
             
             <p className="text-sm text-zinc-500">
               Sign in securely to access the AI-powered Threat Detection Command Center.
@@ -153,21 +152,11 @@ export default function AuthPage() {
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
                 </svg>
               )}
-              <span>{isSignUp ? "Sign up with Google" : "Sign in with Google"}</span>
+              <span>Sign in with Google</span>
             </button>
           </div>
 
-          <div className="mt-4 pt-0  border-t border-zinc-200  text-center">
-            <p className="text-sm pt-5 text-zinc-500">
-              {isSignUp ? "Already cleared for access?" : "Need administrative clearance?"}
-              <button
-                onClick={() => setIsSignUp(!isSignUp)}
-                className="ml-2 text-sm font-bold text-teal-600 hover:text-teal-700 transition-colors"
-              >
-                {isSignUp ? "Sign In" : "Request Access"}
-              </button>
-            </p>
-          </div>
+
 
         </div>
       </div>

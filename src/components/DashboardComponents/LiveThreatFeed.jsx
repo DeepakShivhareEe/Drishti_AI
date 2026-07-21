@@ -34,7 +34,7 @@ export default function LiveThreatFeed() {
         const randomThreat = INCOMING_MOCK_DATA[Math.floor(Math.random() * INCOMING_MOCK_DATA.length)];
         
         const newAlert = {
-          id: `NEW-${Math.floor(Math.random() * 10000)}`,
+          id: `NEW-${crypto.randomUUID().split('-')[0].toUpperCase()}`,
           ...randomThreat,
           time: "Just now",
         };

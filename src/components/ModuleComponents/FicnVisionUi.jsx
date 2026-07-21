@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { fetchWithAuth } from "../../utils/api";
 
 export default function FicnVisionUi() {
   const [files, setFiles] = useState({
@@ -42,7 +43,7 @@ export default function FicnVisionUi() {
     });
 
     try {
-      const response = await fetch("http://127.0.0.1:8001/analyze/session", {
+      const response = await fetchWithAuth("http://127.0.0.1:8001/analyze/session", {
         method: "POST",
         body: formData,
       });

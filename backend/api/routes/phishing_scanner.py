@@ -4,9 +4,10 @@ Phishing Scanner API Routes
 Exposes endpoints for analyzing URLs and SMS/Text messages.
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from core.phishing_engine import scanner
+from core.auth import get_current_user
 
 router = APIRouter(prefix="/api/phishing", tags=["Phishing Scanner"])
 
@@ -16,7 +17,7 @@ class UrlScanRequest(BaseModel):
 class TextScanRequest(BaseModel):
     text: str
 
-@router.post("/scan-url")
+@router.post("/scan-url", dependencies=[Depends(get_current_user)])
 async def scan_url(req: UrlScanRequest):
     """Analyze a single URL for phishing indicators."""
     try:
@@ -27,7 +28,7 @@ async def scan_url(req: UrlScanRequest):
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"URL scanning failed: {str(e)}")
 
-@router.post("/scan-text")
+@router.post("/scan-text", dependencies=[Depends(get_current_user)])
 async def scan_text(req: TextScanRequest):
     """Analyze SMS or email text for phishing indicators."""
     try:

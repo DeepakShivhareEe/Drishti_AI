@@ -8,7 +8,7 @@ Upgrade #3: All metadata_json TEXT columns are parsed to dicts via json.loads()
 Upgrade #4: SSE endpoint for live graph node injection
 """
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Depends
 from sse_starlette.sse import EventSourceResponse
 import sqlite3
 import json
@@ -17,6 +17,8 @@ import datetime
 import logging
 
 logger = logging.getLogger("FRAUD_GRAPH")
+
+from core.auth import get_current_user, get_current_user_sse
 
 router = APIRouter(prefix="/api/v1/fraud-graph", tags=["Fraud Graph Intelligence"])
 
@@ -52,7 +54,7 @@ def _get_conn():
 # ── GET /networks — All fraud network clusters
 # ──────────────────────────────────────────────
 
-@router.get("/networks")
+@router.get("/networks", dependencies=[Depends(get_current_user)])
 def get_all_networks():
     conn = _get_conn()
     cursor = conn.cursor()
@@ -77,7 +79,7 @@ def get_all_networks():
 # ── GET /network/{id} — Single network detail
 # ──────────────────────────────────────────────
 
-@router.get("/network/{network_id}")
+@router.get("/network/{network_id}", dependencies=[Depends(get_current_user)])
 def get_network(network_id: int):
     conn = _get_conn()
     cursor = conn.cursor()
@@ -104,7 +106,7 @@ def get_network(network_id: int):
 # ── POST /analyze — AI pattern analysis
 # ──────────────────────────────────────────────
 
-@router.post("/analyze")
+@router.post("/analyze", dependencies=[Depends(get_current_user)])
 async def analyze_network(request: Request):
     data = await request.json()
     network_id = data.get("network_id")
@@ -177,7 +179,7 @@ async def analyze_network(request: Request):
 # ── GET /evidence/{id} — Court-admissible JSON
 # ──────────────────────────────────────────────
 
-@router.get("/evidence/{network_id}")
+@router.get("/evidence/{network_id}", dependencies=[Depends(get_current_user)])
 def generate_evidence(network_id: int):
     conn = _get_conn()
     cursor = conn.cursor()
@@ -250,7 +252,7 @@ def generate_evidence(network_id: int):
 # ── GET /stats — Aggregate statistics
 # ──────────────────────────────────────────────
 
-@router.get("/stats")
+@router.get("/stats", dependencies=[Depends(get_current_user)])
 def get_stats():
     conn = _get_conn()
     cursor = conn.cursor()
@@ -293,7 +295,7 @@ def get_stats():
 # ── GET /stream — SSE for live graph updates (#4)
 # ──────────────────────────────────────────────
 
-@router.get("/stream")
+@router.get("/stream", dependencies=[Depends(get_current_user_sse)])
 async def stream_graph(request: Request):
     """SSE endpoint that streams new_fraud_node and network_updated events."""
     async def generator():

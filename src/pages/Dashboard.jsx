@@ -5,7 +5,8 @@ import TopMetrics from "../components/DashboardComponents/TopMetrics";
 import LiveThreatFeed from "../components/DashboardComponents/LiveThreatFeed";
 import GeospatialMap from "../components/DashboardComponents/GeospatialMap";
 import FICNTable from "../components/DashboardComponents/FICNTable";
-import FraudGraph from "../components/DashboardComponents/FraudGraph"; // Import the new Graph!
+import FraudGraph from "../components/DashboardComponents/FraudGraph";
+import ErrorBoundary from "../components/ErrorBoundary";
 
 export default function Dashboard() {
   // Now defaulting to our cleaner ID
@@ -27,26 +28,36 @@ export default function Dashboard() {
           <div className="animate-in fade-in duration-500">
             <TopMetrics />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <LiveThreatFeed />
+              <ErrorBoundary>
+                <LiveThreatFeed />
+              </ErrorBoundary>
               <div className="lg:col-span-2 h-[500px]">
-                <GeospatialMap />
+                <ErrorBoundary>
+                  <GeospatialMap />
+                </ErrorBoundary>
               </div>
             </div>
-            <FICNTable />
+            <ErrorBoundary>
+              <FICNTable />
+            </ErrorBoundary>
           </div>
         )}
 
         {/* VIEW 2: FULL GEOSPATIAL MAP */}
         {activeTab === "geospatial map" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 flex flex-col h-[650px] w-full">
-            <GeospatialMap />
+            <ErrorBoundary>
+              <GeospatialMap variant="full" />
+            </ErrorBoundary>
           </div>
         )}
 
         {/* VIEW 3: FRAUD GRAPH NETWORK */}
         {activeTab === "graph network" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <FraudGraph />
+            <ErrorBoundary>
+              <FraudGraph />
+            </ErrorBoundary>
           </div>
         )}
 

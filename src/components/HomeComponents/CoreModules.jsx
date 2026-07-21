@@ -86,7 +86,7 @@ export default function CoreModules() {
   ];
 
   return (
-    <section className="w-full bg-white relative z-10 pt-16 pb-24 border-t border-zinc-200/60">
+    <section id="core-modules" className="w-full bg-white relative z-10 pt-16 pb-24 border-t border-zinc-200/60">
       <div className="max-w-5xl mx-auto px-6">
         
         {/* Section Header */}

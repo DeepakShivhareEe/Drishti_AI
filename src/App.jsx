@@ -22,6 +22,7 @@ import Faqs from "./pages/Faqs";
 
 // Old Pages to keep
 import PhishingPage from './pages/PhishingPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 // New Components
 import Navbar from "./components/HomeComponents/Navbar";
@@ -70,6 +71,9 @@ function AppContent() {
           <Route path="/profile" element={<ProtectedRoute><ClearanceProfile /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><CommandSettings /></ProtectedRoute>} />
           <Route path="/dashboard/phishing" element={<ProtectedRoute><PhishingPage /></ProtectedRoute>} />
+
+          {/* ── 404 Catch-All ────────────────────────────────── */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
       
