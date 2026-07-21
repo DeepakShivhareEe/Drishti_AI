@@ -3,13 +3,13 @@ import { getAuth, GoogleAuthProvider } from "firebase/auth"; // MUST IMPORT THES
 
 // Your specific keys from the Firebase Console go here
 const firebaseConfig = {
-  apiKey: "AIzaSyBY-NXxfuhPaJqtvTOyquyEX5s_tHpjAvk",
-  authDomain: "drishti-ai-a1483.firebaseapp.com",
-  projectId: "drishti-ai-a1483",
-  storageBucket: "drishti-ai-a1483.firebasestorage.app",
-  messagingSenderId: "99586511641",
-  appId: "1:99586511641:web:6010a8e921c504572f2b88",
-  measurementId: "G-R3C06V65B7"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // 1. Initialize Firebase

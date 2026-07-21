@@ -1105,6 +1105,25 @@ SOFTWARE.
 9. **Add Logging** — Structured logging in FastAPI backend (e.g., `loguru`)
 10. **Document API with OpenAPI** — FastAPI auto-generates Swagger UI at `/docs`
 
+## 📁 Folder Structure
+
+```text
+drishti/
+├── backend/               # FastAPI Backend
+│   ├── api/routes/        # Endpoints (citizen_shield, fraud_graph, etc.)
+│   ├── secrets/           # Gitignored secrets (Firebase Admin SDK JSON)
+│   └── main.py            # Entry point for backend
+├── docs/                  # Hackathon deliverables (e.g. Architecture Diagram)
+├── microservices/         # Additional backend microservices (e.g. ficn-vision)
+├── src/                   # React / Vite Frontend
+│   ├── components/        # UI components
+│   ├── pages/             # Route pages
+│   └── firebase.js        # Firebase client initialization
+├── .env.example           # Frontend environment variable template
+├── package.json           # Node.js dependencies
+└── README.md              # Project documentation
+```
+
 ---
 
 <div align="center">
@@ -1114,4 +1133,3 @@ SOFTWARE.
 [⬆ Back to Top](#drishti)
 
 </div>
-
