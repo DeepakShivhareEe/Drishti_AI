@@ -1,0 +1,251 @@
+/* 3D Perspective Container */
+.smartphone-3d-container {
+  perspective: 1500px;
+  width: 100%;
+  max-width: 375px;
+  display: flex;
+  justify-content: center;
+  transform: scale(0.9);
+  transform-origin: top center;
+}
+
+/* Phone Frame */
+.smartphone-mockup {
+  width: 100%;
+  max-width: 330px;
+  height: 650px;
+  margin: 0 auto;
+  border-radius: 36px;
+  box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.4), 
+              0 0 0 12px #18181b, 
+              0 0 0 14px #3f3f46,
+              inset 0 0 20px rgba(255,255,255,0.1);
+  background-color: #f8fafc;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform-style: preserve-3d;
+  transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Add a glare/glass effect on top of the screen */
+.smartphone-glare {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  right: -50%;
+  bottom: -50%;
+  background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 50%);
+  transform: rotateZ(45deg) translateZ(1px);
+  pointer-events: none;
+  z-index: 100;
+  transition: transform 0.1s ease-out;
+}
+
+/* Phone Notch */
+.smartphone-notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) translateZ(10px);
+  width: 120px;
+  height: 25px;
+  background-color: #18181b;
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+  z-index: 50;
+}
+
+/* Status Bar */
+.smartphone-status-bar {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e293b;
+  background-color: transparent;
+  z-index: 40;
+  transform: translateZ(5px);
+}
+
+/* App Themes (PhonePe/GPay Hybrid) */
+.upi-theme-purple .upi-app-header {
+  background-color: #673ab7; /* PhonePe Purple */
+  color: white;
+}
+.upi-theme-purple .upi-back-btn,
+.upi-theme-purple .header-title {
+  color: white;
+}
+
+.upi-app-header {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  z-index: 30;
+  transform: translateZ(15px);
+  transition: background-color 0.3s ease;
+}
+
+.upi-back-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* App Body */
+.upi-app-body {
+  flex: 1;
+  padding: 24px 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  transform-style: preserve-3d;
+}
+
+/* 3D Depth Elements */
+.depth-element-1 { transform: translateZ(20px); }
+.depth-element-2 { transform: translateZ(30px); }
+.depth-element-3 { transform: translateZ(40px); }
+
+/* Urgency Timer */
+.urgency-timer {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 auto;
+  animation: pulseTimer 1s infinite;
+}
+
+@keyframes pulseTimer {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+  50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+
+.shake-animation {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+/* PIN Screen overlay */
+.pin-screen-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  color: white;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  padding: 60px 20px 20px;
+  transform: translateZ(25px);
+}
+
+.pin-dots {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin: 40px 0;
+}
+
+.pin-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: rgba(255,255,255,0.2);
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.pin-dot.filled {
+  background-color: #ffffff;
+  transform: scale(1.2);
+  box-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+.pin-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-top: auto;
+  padding-bottom: 20px;
+}
+
+.pin-key {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 32px;
+  font-weight: 400;
+  padding: 20px 0;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all 0.1s;
+}
+
+.pin-key:active {
+  background-color: rgba(255,255,255,0.3);
+  transform: scale(0.9);
+}
+
+/* Warning Screen */
+.warning-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(12px);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+  text-align: center;
+  color: white;
+  transform: translateZ(50px);
+}
+
+.warning-icon {
+  font-size: 80px;
+  margin-bottom: 24px;
+  filter: drop-shadow(0 0 20px rgba(255,255,255,0.3));
+}
+
+.user-avatar-placeholder {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 24px;
+  color: #475569;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}

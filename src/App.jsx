@@ -22,6 +22,7 @@ import Faqs from "./pages/Faqs";
 
 // Old Pages to keep
 import PhishingPage from './pages/PhishingPage';
+import UpiSimulatorPage from './pages/UpiSimulatorPage';
 
 // New Components
 import Navbar from "./components/HomeComponents/Navbar";
@@ -31,7 +32,7 @@ import Background from "./components/HomeComponents/Background";
 // Import App CSS
 import './App.css';
 
-const FOOTER_HIDDEN_ROUTES = ["/dashboard", "/dashboard/phishing", "/login"];
+const FOOTER_HIDDEN_ROUTES = ["/dashboard", "/dashboard/phishing", "/login", "/module/upi-simulator"];
 const NAVBAR_HIDDEN_ROUTES = ["/login"];
 
 function AppContent() {
@@ -39,9 +40,10 @@ function AppContent() {
   const showFooter = !FOOTER_HIDDEN_ROUTES.includes(location.pathname) && !location.pathname.startsWith('/workspace');
   const showNavbar = !NAVBAR_HIDDEN_ROUTES.includes(location.pathname);
   const isLoginPage = location.pathname === "/login";
+  const isUpiSimulator = location.pathname === "/module/upi-simulator";
 
   return (
-    <div className={`relative flex flex-col ${isLoginPage ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
+    <div className={`relative flex flex-col ${isLoginPage || isUpiSimulator ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
       
       {/* Aurora Background - hidden on login */}
       {!isLoginPage && <Background />}
@@ -70,6 +72,7 @@ function AppContent() {
           <Route path="/profile" element={<ProtectedRoute><ClearanceProfile /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><CommandSettings /></ProtectedRoute>} />
           <Route path="/dashboard/phishing" element={<ProtectedRoute><PhishingPage /></ProtectedRoute>} />
+          <Route path="/module/upi-simulator" element={<UpiSimulatorPage />} />
         </Routes>
       </main>
       
