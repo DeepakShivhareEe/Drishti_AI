@@ -6,8 +6,8 @@ const RECENT_SCANS = [
 
 export default function FICNTable() {
   return (
-    <div className="mt-6 bg-white border border-zinc-200 rounded-2xl shadow-sm overflow-hidden">
-      <div className="p-5 border-b border-zinc-100">
+    <div className="mt-6 bg-white border border-zinc-200 rounded-2xl shadow-md overflow-hidden">
+      <div className="p-6 border-b border-zinc-100">
         <h2 className="text-lg font-bold text-zinc-900">Recent Currency Scans (FICN Vision)</h2>
       </div>
       <div className="overflow-x-auto">
@@ -24,19 +24,29 @@ export default function FICNTable() {
           </thead>
           <tbody className="text-sm font-medium text-zinc-700">
             {RECENT_SCANS.map((scan, i) => (
-              <tr key={i} className="border-b border-zinc-50 hover:bg-zinc-50/50 transition-colors last:border-0">
+              <tr key={i} className="border-b border-zinc-50 even:bg-zinc-50/50 hover:bg-zinc-100/50 transition-colors last:border-0">
                 <td className="p-4 font-mono text-zinc-900">{scan.serial}</td>
                 <td className="p-4">{scan.denomination}</td>
                 <td className="p-4">{scan.source}</td>
                 <td className="p-4">{scan.location}</td>
                 <td className="p-4">
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${
-                    scan.result === "Counterfeit" ? "bg-red-50 text-red-600 border border-red-100" : "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                  <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-extrabold ${
+                    scan.result === "Counterfeit" ? "bg-red-50 text-[#E5484D] border border-[#E5484D]/30" : "bg-emerald-50 text-[#0F9D78] border border-[#0F9D78]/30"
                   }`}>
                     {scan.result}
                   </span>
                 </td>
-                <td className="p-4">{scan.confidence}</td>
+                <td className="p-4">
+                  <div className="flex flex-col gap-1 min-w-[120px]">
+                    <span className="text-xs font-bold text-zinc-700">{scan.confidence}</span>
+                    <div className="w-full h-1.5 bg-zinc-200 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full rounded-full ${scan.result === "Counterfeit" ? "bg-[#E5484D]" : "bg-[#0F9D78]"}`} 
+                        style={{ width: scan.confidence }}
+                      ></div>
+                    </div>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>

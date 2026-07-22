@@ -722,7 +722,7 @@ npm run dev
 cd backend && uvicorn main:app --reload --port 8000
 
 # ML Engine (Terminal 3) — separate service
-uvicorn ficn_engine:app --reload --port 8001
+cd microservices/ficn-vision && uvicorn app.main:app --reload --port 8001
 ```
 
 ### Production Build

@@ -48,10 +48,10 @@ export default function LiveThreatFeed() {
   }, [isLive]);
 
   return (
-    <div className="bg-white border border-zinc-200 rounded-2xl shadow-sm flex flex-col h-[500px]">
+    <div className="bg-white border border-zinc-200 rounded-2xl shadow-md flex flex-col h-[500px]">
       
       {/* Feed Header */}
-      <div className="p-5 border-b border-zinc-100 flex items-center justify-between">
+      <div className="p-6 border-b border-zinc-100 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h2 className="text-lg font-bold text-zinc-900">Live Threat Feed</h2>
           
@@ -82,13 +82,19 @@ export default function LiveThreatFeed() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className="p-4 hover:bg-zinc-50 rounded-xl transition-colors border-b border-zinc-50 last:border-0 cursor-pointer"
+              className={`p-4 hover:bg-zinc-50 rounded-xl transition-colors border-b border-zinc-50 last:border-0 cursor-pointer border-l-4 ${
+                alert.status === "Critical" ? "border-l-[#E5484D]" :
+                alert.status === "Warning" ? "border-l-orange-500" :
+                alert.status === "Alert" ? "border-l-[#1A3FA0]" :
+                "border-l-zinc-300"
+              }`}
             >
               <div className="flex items-center justify-between mb-2">
                 <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
                   alert.status === "Critical" ? "bg-red-50 text-red-600 border-red-100" :
                   alert.status === "Warning" ? "bg-orange-50 text-orange-600 border-orange-100" :
-                  "bg-blue-50 text-blue-600 border-blue-100"
+                  alert.status === "Alert" ? "bg-[#1A3FA0]/10 text-[#1A3FA0] border-[#1A3FA0]/20" :
+                  "bg-zinc-100 text-zinc-600 border-zinc-200"
                 }`}>
                   {alert.status}
                 </span>
@@ -96,7 +102,7 @@ export default function LiveThreatFeed() {
                   {alert.time}
                 </span>
               </div>
-              <p className="text-sm font-bold text-zinc-900 mb-1">{alert.type} • <span className="text-zinc-500 font-medium">{alert.location}</span></p>
+              <p className="text-sm font-extrabold text-zinc-900 mb-1">{alert.type} <span className="text-zinc-400 font-medium ml-1">• {alert.location}</span></p>
               <p className="text-xs text-zinc-600">{alert.details}</p>
             </motion.div>
           ))}
@@ -141,13 +147,19 @@ export default function LiveThreatFeed() {
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.9 }}
                         layout
-                        className="p-5 bg-white rounded-xl border border-zinc-200 shadow-sm hover:shadow-md hover:border-blue-200 transition-all"
+                        className={`p-6 bg-white rounded-2xl border shadow-md hover:shadow-lg transition-all border-l-4 ${
+                          alert.status === "Critical" ? "border-l-[#E5484D] border-y-zinc-200 border-r-zinc-200" :
+                          alert.status === "Warning" ? "border-l-orange-500 border-y-zinc-200 border-r-zinc-200" :
+                          alert.status === "Alert" ? "border-l-[#1A3FA0] border-y-zinc-200 border-r-zinc-200" :
+                          "border-l-zinc-300 border-y-zinc-200 border-r-zinc-200"
+                        }`}
                       >
                         <div className="flex items-center justify-between mb-4">
                           <span className={`px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider border ${
                             alert.status === "Critical" ? "bg-red-50 text-red-600 border-red-100" :
                             alert.status === "Warning" ? "bg-orange-50 text-orange-600 border-orange-100" :
-                            "bg-blue-50 text-blue-600 border-blue-100"
+                            alert.status === "Alert" ? "bg-[#1A3FA0]/10 text-[#1A3FA0] border-[#1A3FA0]/20" :
+                            "bg-zinc-100 text-zinc-600 border-zinc-200"
                           }`}>
                             {alert.status}
                           </span>
@@ -155,12 +167,12 @@ export default function LiveThreatFeed() {
                             {alert.time}
                           </span>
                         </div>
-                        <p className="text-lg font-bold text-zinc-900 mb-1 leading-tight">{alert.type}</p>
+                        <p className="text-lg font-extrabold text-zinc-900 mb-1 leading-tight">{alert.type}</p>
                         <p className="text-sm text-zinc-500 font-medium mb-4 flex items-center gap-1">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                           {alert.location}
                         </p>
-                        <div className="p-3 bg-zinc-50 rounded-lg text-sm text-zinc-700 border border-zinc-100 font-medium">
+                        <div className="p-3 bg-zinc-50 rounded-xl text-sm text-zinc-700 border border-zinc-100 font-medium">
                           {alert.details}
                         </div>
                       </motion.div>

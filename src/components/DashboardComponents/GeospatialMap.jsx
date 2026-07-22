@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Polyline } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -172,11 +172,28 @@ export default function GeospatialMap({ variant = "compact" }) {
     }
   };
 
+  // ── 4. Trackpad Pinch-to-Zoom Fix ──
+  // Leaflet uses 'wheel' events for trackpad pinches (with ctrlKey = true).
+  // We intercept wheel events before Leaflet sees them. If it's a normal scroll,
+  // we stop propagation (so Leaflet doesn't zoom) but let the browser scroll the page.
+  const mapWrapperRef = useRef(null);
+  useEffect(() => {
+    const el = mapWrapperRef.current;
+    if (!el) return;
+    const handleWheel = (e) => {
+      if (!e.ctrlKey) {
+        e.stopPropagation(); // Block regular scroll from reaching Leaflet
+      }
+    };
+    el.addEventListener("wheel", handleWheel, { capture: true, passive: false });
+    return () => el.removeEventListener("wheel", handleWheel, { capture: true });
+  }, []);
+
   // Adjust height based on whether it is in the overview or its own dedicated tab
   const heightClass = variant === "full" ? "h-[700px]" : "h-[500px]";
 
   return (
-    <div className={`lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-xl overflow-hidden relative flex flex-col ${heightClass}`}>
+    <div className={`lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-md overflow-hidden relative z-0 flex flex-col ${heightClass}`}>
       
       {/* ── UI OVERLAYS (Z-Index must be high to sit over Leaflet) ── */}
       
@@ -203,9 +220,31 @@ export default function GeospatialMap({ variant = "compact" }) {
         </div>
       )}
       
+      {/* Map Legend */}
+      <div className="absolute bottom-5 left-5 z-[1000] pointer-events-none">
+        <div className="bg-zinc-900/80 backdrop-blur-md border border-zinc-700/50 rounded-xl p-3 shadow-lg flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-[#ef4444] shadow-[0_0_8px_rgba(239,68,68,0.6)]"></span>
+            <span className="text-xs font-bold text-zinc-300">Critical</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-[#f97316] shadow-[0_0_8px_rgba(249,115,22,0.6)]"></span>
+            <span className="text-xs font-bold text-zinc-300">High</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-[#3b82f6] shadow-[0_0_8px_rgba(59,130,246,0.6)]"></span>
+            <span className="text-xs font-bold text-zinc-300">Medium</span>
+          </div>
+        </div>
+      </div>
+
       {/* Floating Info Panel for Active Node */}
       {activeNode && (
-        <div className="absolute bottom-5 right-5 w-72 bg-zinc-900/95 backdrop-blur-md border border-zinc-700 rounded-xl shadow-2xl p-4 z-[1000] pointer-events-auto transition-all duration-300">
+        <div className={`absolute bottom-5 right-5 w-72 bg-zinc-900/70 backdrop-blur-xl border-t-2 rounded-xl shadow-2xl p-6 z-[1000] pointer-events-auto transition-all duration-300 ${
+          activeNode.threat === 'Critical' ? 'border-t-[#ef4444] border-x-zinc-700 border-b-zinc-700' :
+          activeNode.threat === 'High' ? 'border-t-[#f97316] border-x-zinc-700 border-b-zinc-700' :
+          'border-t-[#3b82f6] border-x-zinc-700 border-b-zinc-700'
+        }`}>
           <div className="flex justify-between items-start mb-3 border-b border-zinc-800 pb-3">
             <div>
               <h3 className="text-white font-bold text-sm">{activeNode.city}</h3>
@@ -244,11 +283,13 @@ export default function GeospatialMap({ variant = "compact" }) {
       )}
 
       {/* ── THE INTERACTIVE MAP CANVAS ── */}
-      <div className="flex-1 relative z-0">
+      <div className="flex-1 relative z-0" ref={mapWrapperRef}>
         <MapContainer 
           center={[22.5937, 78.9629]}
           zoom={4.5} 
-          zoomControl={false}
+          zoomControl={true}
+          scrollWheelZoom={true}
+          touchZoom={true}
           className="w-full h-full"
           style={{ background: '#0e0e0e' }}
         >
